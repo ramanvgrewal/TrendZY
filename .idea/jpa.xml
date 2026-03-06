@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PersistenceUnitSettings">
+    <persistence-units>
+      <persistence-unit moduleName="trendpulse" name="trendpulse" framework="JPA" ormUnit="trendpulse:trendpulse" defaultDataSourceId="9c290c2a-70e2-4eba-ae75-06a65b734663" />
+    </persistence-units>
+  </component>
+</project>
