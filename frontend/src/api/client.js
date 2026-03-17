@@ -81,6 +81,36 @@ export async function fetchCategories() {
     }
 }
 
+export async function fetchVibes() {
+    try {
+        const { data } = await api.get('/api/trends/vibes');
+        backendOffline = false;
+        return data;
+    } catch {
+        backendOffline = true;
+        return ["aesthetic", "Y2K", "minimalist", "streetwear"];
+    }
+}
+
+export async function fetchSections() {
+    try {
+        const { data } = await api.get('/api/trends/sections');
+        backendOffline = false;
+        return data;
+    } catch {
+        backendOffline = true;
+        // mock sections
+        return [
+            {
+                subcategory: "Sneakers",
+                emoji: "👟",
+                topVibes: ["streetwear"],
+                trends: mockTrends.slice(0, 4)
+            }
+        ];
+    }
+}
+
 /* ── Session / Personalisation APIs ── */
 
 export async function recordView(sessionId, trendId) {
@@ -97,6 +127,61 @@ export async function recordBuyClick(sessionId, trendId) {
     } catch {
         // silent — non-critical
     }
+}
+
+/* ── Curated Products (ONLY ON TRENDZY) ── */
+
+export async function fetchCuratedProducts(category) {
+    try {
+        const params = category ? { category } : {};
+        const { data } = await api.get('/api/curated', { params });
+        backendOffline = false;
+        return data;
+    } catch {
+        backendOffline = true;
+        return [];
+    }
+}
+
+export async function fetchFeaturedCurated() {
+    try {
+        const { data } = await api.get('/api/curated/featured');
+        backendOffline = false;
+        return data;
+    } catch {
+        backendOffline = true;
+        return [];
+    }
+}
+
+export async function fetchCuratedCategories() {
+    try {
+        const { data } = await api.get('/api/curated/categories');
+        backendOffline = false;
+        return data;
+    } catch {
+        backendOffline = true;
+        return [];
+    }
+}
+
+export async function saveCuratedProduct(product) {
+    const { data } = await api.post('/api/curated', product);
+    return data;
+}
+
+export async function updateCuratedProduct(id, product) {
+    const { data } = await api.put(`/api/curated/${id}`, product);
+    return data;
+}
+
+export async function deleteCuratedProduct(id) {
+    await api.delete(`/api/curated/${id}`);
+}
+
+export async function bulkImportCurated(products) {
+    const { data } = await api.post('/api/curated/bulk', products);
+    return data;
 }
 
 export default api;

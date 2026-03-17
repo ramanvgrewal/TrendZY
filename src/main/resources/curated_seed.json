@@ -1,0 +1,1263 @@
+[
+  {
+    "category": "Streetwear",
+    "productType": "T-Shirt",
+    "brandName": "VEIRDO",
+    "productName": "Oversized Logo Tee",
+    "imageUrl": "https://veirdo.in/cdn/shop/files/67_21.jpg?v=1758284987end",
+    "websiteLink": "https://veirdo.in",
+    "priceInr": 649,
+    "priceRange": "550-750",
+    "description": "Minimalist streetwear tee",
+    "featured": false,
+    "vibeTags": [
+      "Streetwear",
+      "GenZ",
+      "BudgetFit"
+    ]
+  },
+  {
+    "category": "Y2K",
+    "productType": "Fitted Tank",
+    "brandName": "ASOS",
+    "productName": "Ribbed Crop Tank",
+    "imageUrl": "https://images.asos-media.com/products/abercrombie-fitch-bra-free-90s-seamless-tank-top-in-black/210472899-1-black?$n_640w$&wid=513&fit=constrain",
+    "websiteLink": "https://www.asos.com/search/?q=y2k+crop+tank",
+    "priceInr": 899,
+    "priceRange": "700-1100",
+    "description": "Y2K ribbed fitted tank top",
+    "featured": false,
+    "vibeTags": [
+      "Y2K",
+      "ForHer",
+      "GenZ"
+    ]
+  },
+  {
+    "category": "Vintage",
+    "productType": "Jeans",
+    "brandName": "Thrifted Urban",
+    "productName": "Distressed Wash Jeans",
+    "imageUrl": "//www.thrifted.com/cdn/shop/files/Daisy_jeans_16.10.25238_d7cf92fb-9ca5-4ac0-ba43-96b7d613fbbe_1024x.jpg?v=1764763688",
+    "websiteLink": "https://www.thrifted.com/search?q=wash+jeans&options%5Bprefix%5D=last",
+    "priceInr": 1299,
+    "priceRange": "1100-1500",
+    "description": "90s vintage style distressed denim",
+    "featured": false,
+    "vibeTags": [
+      "90sVibes",
+      "Vintage",
+      "Sustainable"
+    ]
+  },
+  {
+    "category": "Accessories",
+    "productType": "Bucket Hat",
+    "brandName": "NYKAA",
+    "productName": "Logo Bucket Hat",
+    "imageUrl": "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/d/d/ddd6627OHAIRD00000463_1.jpg?rnd=20200526195200&tr=w-1536",
+    "websiteLink": "https://www.nykaafashion.com/catalogsearch/result/?q=Bucket%20Hat&searchType=ManualSearch&internalSearchTerm=Bucket+Hat&typedSearchTerm=Bucket+Hat",
+    "priceInr": 399,
+    "priceRange": "300-500",
+    "description": "Trendy logo bucket hat",
+    "featured": false,
+    "vibeTags": [
+      "Y2K",
+      "GenZ",
+      "BudgetFit"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "Bomber Jacket",
+    "brandName": "SNITCH",
+    "productName": "Black Bomber Jacket",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0420/7073/7058/files/4msk8766-05_1.jpg?v=1762190980&quality=80",
+    "websiteLink": "https://www.snitch.com/search/bomber%20jacket",
+    "priceInr": 1599,
+    "priceRange": "1400-1800",
+    "description": "Classic black bomber jacket",
+    "featured": true,
+    "vibeTags": [
+      "Streetwear",
+      "GenZ",
+      "CollegeFit"
+    ]
+  },
+  {
+    "category": "Sustainable",
+    "productType": "T-Shirt",
+    "brandName": "AROKA",
+    "productName": "Hemp Blend Tee",
+    "imageUrl": "https://aroka.in/cdn/shop/files/182.jpg?v=1756537423&width=700",
+    "websiteLink": "https://aroka.in/products/white-organic-cotton-twist-shirt?_pos=2&_sid=fb6e6e44e&_ss=r",
+    "priceInr": 649,
+    "priceRange": "550-750",
+    "description": "Sustainable hemp blend tee",
+    "featured": false,
+    "vibeTags": [
+      "Sustainable",
+      "IndieIndia",
+      "BudgetFit"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "Sweatshirt",
+    "brandName": "Bewakoof",
+    "productName": "Graphic Print Sweatshirt",
+    "imageUrl": "https://images.bewakoof.com/t1080/men-s-black-batman-graphic-printed-t-shirt-283891-1738831776-1.jpg",
+    "websiteLink": "https://www.bewakoof.com/search?q=sweatshirt",
+    "priceInr": 799,
+    "priceRange": "600-1000",
+    "description": "Fun graphic print sweatshirt",
+    "featured": false,
+    "vibeTags": [
+      "Streetwear",
+      "GenZ",
+      "BudgetFit"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "Cargo Pants",
+    "brandName": "Snitch",
+    "productName": "Tactical Cargo Pants",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0420/7073/7058/files/4MSR5039-05-3216.jpg?v=1695654473&quality=80",
+    "websiteLink": "https://www.snitch.com/products/cargo",
+    "priceInr": 1699,
+    "priceRange": "1400-2000",
+    "description": "Tactical streetwear cargo pants",
+    "featured": false,
+    "vibeTags": [
+      "Streetwear",
+      "GenZ",
+      "CollegeFit"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "Dad Cap",
+    "brandName": "Urban Monkey",
+    "productName": "Baseball Dad Cap",
+    "imageUrl": "https://www.urbanmonkey.com/cdn/shop/files/Founders_Club_Green_Baseball_Dad_Cap_02.jpg?v=1772606411&width=1200",
+    "websiteLink": "https://www.urbanmonkey.com/collections/new-arrivals/products/founders-club-002",
+    "priceInr": 1599,
+    "priceRange": "1100-1500",
+    "description": "Street culture oversized sweatshirt",
+    "featured": true,
+    "vibeTags": [
+      "Streetwear",
+      "GenZ",
+      "IndieIndia"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "Graphic Tee",
+    "brandName": "Snitch",
+    "productName": "Bold Typography Tee",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0420/7073/7058/files/4MST3116-03_1_c434db1d-5dd0-431c-af1c-738e13a87488.jpg?v=1754927697&quality=80",
+    "websiteLink": "https://www.snitch.com/men-t-shirts/regular-fit-graphic-t-shirt-4mst3116-03/8740696490146/buy",
+    "priceInr": 899,
+    "priceRange": "700-1100",
+    "description": "Bold typography graphic print tee",
+    "featured": false,
+    "vibeTags": [
+      "Streetwear",
+      "GenZ",
+      "BudgetFit"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "Jacket",
+    "brandName": "Fugazee",
+    "productName": "Textured Oversized Jacket",
+    "imageUrl": "https://www.fugazee.com/cdn/shop/files/Main_1fc70091-2a25-4cae-8b0c-09f39bf246f7.jpg?v=1766055165&width=322",
+    "websiteLink": "https://www.fugazee.com/search?options%5Bprefix%5D=last&q=oversized+jacket",
+    "priceInr": 2299,
+    "priceRange": "2000-2600",
+    "description": "Textured oversized hip hop jacket",
+    "featured": false,
+    "vibeTags": [
+      "Streetwear",
+      "GenZ",
+      "IndieIndia"
+    ]
+  },
+  {
+    "category": "Footwear",
+    "productType": "Canvas Sneaker",
+    "brandName": "Adidas",
+    "productName": "Classic White Canvas Sneaker",
+    "imageUrl": "https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/2e1dd02e5e514ae39189722c96546b95_9366/LightRun-Win_2_Shoes_White_KI8939_01_00_standard.jpg",
+    "websiteLink": "https://www.adidas.co.in/search?q=white+canvass+sneaker",
+    "priceInr": 4999,
+    "priceRange": "4500-5500",
+    "description": "Classic Adidas white canvas sneaker",
+    "featured": false,
+    "vibeTags": [
+      "Streetwear",
+      "GenZ",
+      "Unisex"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "Monochrome Tee",
+    "brandName": "NORBLACK NORWHITE",
+    "productName": "Clean Line Monochrome Tee",
+    "imageUrl": "https://norblacknorwhite.in/cdn/shop/files/1.M_2520_25281_2529_720x.jpg?v=1759055031",
+    "websiteLink": "https://norblacknorwhite.in/search?q=tee",
+    "priceInr": 999,
+    "priceRange": "800-1200",
+    "description": "Clean line minimal monochrome tee",
+    "featured": true,
+    "vibeTags": [
+      "Minimal",
+      "Streetwear",
+      "IndieIndia"
+    ]
+  },
+  {
+    "category": "Y2K",
+    "productType": "Halter Top",
+    "brandName": "Littlebox",
+    "productName": "Bright Summer Halter Top",
+    "imageUrl": "https://littleboxindia.com/cdn/shop/files/Party_Halter_Neck_Twist_Front_Sleeveless_Crop_Top_in_Orange_720x.jpg?v=1769798054",
+    "websiteLink": "https://littleboxindia.com/search?type=product&options%5Bprefix%5D=last&q=halter+top",
+    "priceInr": 549,
+    "priceRange": "450-700",
+    "description": "Bright Y2K summer halter top",
+    "featured": false,
+    "vibeTags": [
+      "Y2K",
+      "ForHer",
+      "BudgetFit"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "Logo Hoodie",
+    "brandName": "NYKAA",
+    "productName": "Brand Logo Sweatshirt",
+    "imageUrl": "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/a/e/aec7ba0GRLW88NVYAMERICAN_1.jpg?rnd=20200526195200&tr=w-1080",
+    "websiteLink": "https://www.nykaafashion.com/leotude-women-graphic-navy-loose-fit-sweatshirt-with-hood/p/23652717",
+    "priceInr": 999,
+    "priceRange": "800-1200",
+    "description": "Trendy brand logo hoodie sweatshirt",
+    "featured": false,
+    "vibeTags": [
+      "Streetwear",
+      "GenZ",
+      "BudgetFit"
+    ]
+  },
+  {
+    "category": "Footwear",
+    "productType": "Casual Sneaker",
+    "brandName": "Skechers",
+    "productName": "Comfort Casual Sneaker",
+    "imageUrl": "https://images.skechers.com/image;width=1120%2Cformat=auto/177197_NVY_HERO_LG",
+    "websiteLink": "https://www.skechers.com/skechers-slip-ins-arch-fit-arcade---see-ya-there/177197_NVY.html",
+    "priceInr": 3999,
+    "priceRange": "3500-4500",
+    "description": "Comfortable daily casual sneaker",
+    "featured": false,
+    "vibeTags": [
+      "Streetwear",
+      "Unisex",
+      "CollegeFit"
+    ]
+  },
+  {
+    "category": "Denim",
+    "productType": "Light Wash Jeans",
+    "brandName": "Zara",
+    "productName": "Classic Light Wash Denim",
+    "imageUrl": "https://static.zara.net/assets/public/2e49/9c64/034c4772995a/df5ab9e1a4c6/03607207406-p/03607207406-p.jpg?ts=1770827693425&w=255",
+    "websiteLink": "https://www.zara.com/in/en/search?searchTerm=classic%20light%20wash%20denim&section=WOMAN",
+    "priceInr": 1999,
+    "priceRange": "1700-2300",
+    "description": "Classic Zara light wash denim jeans",
+    "featured": false,
+    "vibeTags": [
+      "Minimal",
+      "GenZ",
+      "Unisex"
+    ]
+  },
+  {
+    "category": "Footwear",
+    "productType": "Low Top Sneaker",
+    "brandName": "Nike",
+    "productName": "Classic White Nike Low Top",
+    "imageUrl": "https://static.nike.com/a/images/t_web_pdp_535_v2/f_auto,u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/eeacb75f-4f1f-4c1a-abef-b5025adc6f50/W+NIKE+PACIFIC.png",
+    "websiteLink": "https://www.nike.com/t/pacific-womens-shoes-f877d1Or/HM4771-103",
+    "priceInr": 5999,
+    "priceRange": "5500-6500",
+    "description": "Classic Nike white low top sneaker",
+    "featured": true,
+    "vibeTags": [
+      "Streetwear",
+      "GenZ",
+      "Unisex"
+    ]
+  },
+  {
+    "category": "Denim",
+    "productType": "Mid-Rise Jeans",
+    "brandName": "H&M",
+    "productName": "Skinny Fit Mid-Rise Denim",
+    "imageUrl": "https://image.hm.com/assets/hm/c9/04/c9041fc7ceabf8bf3080cd6a6617a0fc9e1377c8.jpg?imwidth=384",
+    "websiteLink": "https://www2.hm.com/en_in/search-results.html?q=mid+rise+jeans&page_key=2026-03-10T15:14:30.621Z--mid_rise_jeans",
+    "priceInr": 1499,
+    "priceRange": "1300-1700",
+    "description": "Classic H&M skinny fit mid-rise jeans",
+    "featured": false,
+    "vibeTags": [
+      "Minimal",
+      "GenZ",
+      "Unisex"
+    ]
+  },
+  {
+    "category": "Sustainable",
+    "productType": "Merino Sweater",
+    "brandName": "Everlane",
+    "productName": "Ultra-Soft Recycled Merino Sweater",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0623/7916/3734/files/c03b82c9_e1de_700x.jpg?v=1758129540",
+    "websiteLink": "https://www.everlane.com/products/mens-luxe-merino-dblknit-sweater-taupe-melange",
+    "priceInr": 4299,
+    "priceRange": "3800-4800",
+    "description": "Ultra-soft recycled merino wool sweater",
+    "featured": false,
+    "vibeTags": [
+      "Sustainable",
+      "Minimal",
+      "LuxuryPick"
+    ]
+  },
+  {
+    "category": "Footwear",
+    "productType": "Platform Boot",
+    "brandName": "Dr Martens",
+    "productName": "Classic Black Platform Boot",
+    "imageUrl": "https://cdn.media.amplience.net/i/drmartens/26925001.80?$smart1024$&fmt=auto",
+    "websiteLink": "https://www.drmartens.com/us/en/1460-max-leather-platform-boots-black/p/26925001",
+    "priceInr": 8999,
+    "priceRange": "8000-10000",
+    "description": "Iconic Dr Martens black platform boot",
+    "featured": true,
+    "vibeTags": [
+      "90sVibes",
+      "DarkAcademia",
+      "LuxuryPick"
+    ]
+  },
+  {
+    "category": "Footwear",
+    "productType": "Retro Sneaker",
+    "brandName": "Reebok",
+    "productName": "Classic Retro Reebok Sneaker",
+    "imageUrl": "https://reebok.abfrl.in/p/campio-xt-40249081.html?source=plp",
+    "websiteLink": "https://reebok.abfrl.in/c/search?search_query=sneaker&stype=3",
+    "priceInr": 4499,
+    "priceRange": "4000-5000",
+    "description": "Reebok classic retro runner sneaker",
+    "featured": false,
+    "vibeTags": [
+      "90sVibes",
+      "Streetwear",
+      "Unisex"
+    ]
+  },
+  {
+    "category": "Denim",
+    "productType": "Denim Shirt",
+    "brandName": "Lee",
+    "productName": "Classic Lee Denim Button Shirt",
+    "imageUrl": "https://images.lee.com/is/image/Lee/112346776-ALT1?$KDP-LARGE2$",
+    "websiteLink": "https://www.lee.com/search?q=denim+shirt&search-button=&lang=en_US",
+    "priceInr": 1699,
+    "priceRange": "1500-1900",
+    "description": "Classic Lee denim button-up shirt",
+    "featured": false,
+    "vibeTags": [
+      "90sVibes",
+      "Unisex",
+      "CollegeFit"
+    ]
+  },
+  {
+    "category": "Footwear",
+    "productType": "Slip-On Sneaker",
+    "brandName": "Vans",
+    "productName": "Classic Canvas Slip On",
+    "imageUrl": "https://assets.vans.com/images/t_img/c_fill,g_center,f_auto,h_573,e_unsharp_mask:100,w_458/dpr_2.0/v1740196690/VN000EYEBLK-HERO/Classic-SlipOn-Shoe-VANS-Black-HERO.png",
+    "websiteLink": "https://www.vans.com/en-us/p/shoes/icons/classic-slip-on-5315/classic-slip-on-shoe-VN000EYEBLK",
+    "priceInr": 4299,
+    "priceRange": "3800-4800",
+    "description": "Iconic Vans canvas slip-on sneaker",
+    "featured": false,
+    "vibeTags": [
+      "90sVibes",
+      "Streetwear",
+      "Unisex"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "Oversized Coat",
+    "brandName": "NEWME",
+    "productName": "Long Oversized Streetwear Coat",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0420/7073/7058/files/4MSS2623-02-M39.jpg?v=1703681512&quality=80",
+    "websiteLink": "https://www.snitch.com/men-overshirt/buy",
+    "priceInr": 3499,
+    "priceRange": "3000-4000",
+    "description": "Long oversized premium streetwear coat",
+    "featured": false,
+    "vibeTags": [
+      "Streetwear",
+      "Minimal",
+      "OfficeLook"
+    ]
+  },
+  {
+    "category": "Sustainable",
+    "productType": "Jute Tote Bag",
+    "brandName": "Mynt",
+    "productName": "Natural Jute Tote Bag",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0420/7073/7058/files/01_bafcc1d9-5840-4902-8e1c-595c2ceb579c.jpg?v=1770373305&quality=80",
+    "websiteLink": "https://www.snitch.com/women-bags/buy",
+    "priceInr": 1299,
+    "priceRange": "1100-1500",
+    "description": "Eco natural jute sustainable tote bag",
+    "featured": false,
+    "vibeTags": [
+      "Sustainable",
+      "IndieIndia",
+      "ForHer"
+    ]
+  },
+  {
+    "category": "Denim",
+    "productType": "Wide Leg Jeans",
+    "brandName": "DZT",
+    "productName": "Classic Wide Leg Denim Jeans",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0420/7073/7058/files/c8b519b21420ed22f5b046b9ac4437f6.webp?v=1772603593&quality=80",
+    "websiteLink": "https://www.snitch.com/men-jeans/buy",
+    "priceInr": 1799,
+    "priceRange": "1600-2000",
+    "description": "Classic relaxed wide leg denim jeans",
+    "featured": false,
+    "vibeTags": [
+      "90sVibes",
+      "GenZ",
+      "Unisex"
+    ]
+  },
+  {
+    "category": "Footwear",
+    "productType": "Sneaker",
+    "brandName": "Vans",
+    "productName": "Sneakers",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0420/7073/7058/files/4msh0127-02_4.jpg?v=1746843841&quality=80",
+    "websiteLink": "https://www.snitch.com/men-shoes/beige-solid-with-perforations-sneakers-4msh0127-02/8666062913698/buy",
+    "priceInr": 5999,
+    "priceRange": "5500-6500",
+    "description": "Professional Vans skate performance shoe",
+    "featured": false,
+    "vibeTags": [
+      "Streetwear",
+      "90sVibes",
+      "Unisex"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "Mesh shirt",
+    "brandName": "Powerful",
+    "productName": "See-Through Mesh shirt",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0420/7073/7058/files/1_8173f968-1e67-4266-86cd-e53e77698418.jpg?v=1769102417&quality=80",
+    "websiteLink": "https://www.snitch.com/men-shirts/classic-collar-textured-regular-fit-shirt-4mss4663-03/8896660996258/buy",
+    "priceInr": 1499,
+    "priceRange": "850-1500",
+    "description": "Bold see-through mesh streetwear overshirt",
+    "featured": false,
+    "vibeTags": [
+      "Streetwear",
+      "GenZ",
+      "BudgetFit"
+    ]
+  },
+  {
+    "category": "Y2K",
+    "productType": "Black cap",
+    "brandName": "Avana",
+    "productName": "Black Cap",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0420/7073/7058/files/4mcp1007-01_1.jpg?v=1772639312&quality=80",
+    "websiteLink": "https://www.snitch.com/men-accessories/sleek-black-embroidered-cap-4mcp1007-01/8907978014882/buy",
+    "priceInr": 699,
+    "priceRange": "550-850",
+    "description": "Gold layered chain Y2K necklace set",
+    "featured": false,
+    "vibeTags": [
+      "Y2K",
+      "ForHer",
+      "BudgetFit"
+    ]
+  },
+  {
+    "category": "Denim",
+    "productType": "Cut-Off Shorts",
+    "brandName": "RagNone",
+    "productName": "Distressed Cut-Off Denim Shorts",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0420/7073/7058/files/1_76301e44-1ba2-4f86-909c-d3268e7c8fe1.jpg?v=1771262319&quality=80",
+    "websiteLink": "https://www.snitch.com/men-shorts/buy",
+    "priceInr": 899,
+    "priceRange": "700-1100",
+    "description": "Distressed cut-off raw hem denim shorts",
+    "featured": false,
+    "vibeTags": [
+      "90sVibes",
+      "Streetwear",
+      "BudgetFit"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "T-Shirt",
+    "brandName": "Veirdo",
+    "productName": "Oversized Logo Tee",
+    "imageUrl": "https://veirdo.in/cdn/shop/files/67_21.jpg",
+    "websiteLink": "https://veirdo.in/products/veirdo-original-swanwhite-oversized-typography-brand-printed-tshirt",
+    "priceInr": 549,
+    "priceRange": "500-600",
+    "description": "Minimalist streetwear tee with oversized logo design",
+    "featured": true,
+    "vibeTags": [
+      "Streetwear",
+      "GenZ",
+      "BudgetFit"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "Shirt",
+    "brandName": "Snitch",
+    "productName": "Sculpt Rock Black Shirt",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0420/7073/7058/files/4MSS2169-01-M23.jpg?v=1691234778",
+    "websiteLink": "https://www.snitch.com/men-shirts/sculpt-rock-black-shirt/8010324377762/buy",
+    "priceInr": 899,
+    "priceRange": "800-1000",
+    "description": "Classy black rayon shirt, slim fit with half sleeves",
+    "featured": true,
+    "vibeTags": [
+      "Streetwear",
+      "GenZ",
+      "SmartCasual"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "T-Shirt",
+    "brandName": "Snitch",
+    "productName": "PINK Zipper Polo T-Shirt",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0420/7073/7058/files/4MST2418-0331.jpg?v=1729244060&quality=80",
+    "websiteLink": "https://www.snitch.com/men-t-shirts/white-zipper-polo-t-shirt-4mst2418-03/8460202639522/buy",
+    "priceInr": 1129,
+    "priceRange": "1000-1200",
+    "description": "Timeless white slim fit T-shirt, perfect for layering or solo wear",
+    "featured": true,
+    "vibeTags": [
+      "Streetwear",
+      "GenZ",
+      "Versatile"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "T-Shirt",
+    "brandName": "Snitch",
+    "productName": "Navy Slim Fit Polo T-Shirt",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0420/7073/7058/files/4MST2416-02-M0361.jpg?v=1763014115&quality=80",
+    "websiteLink": "https://www.snitch.com/men-t-shirts/navy-slim-fit-polo-t-shirt-4mst2416-02/8460202279074/buy",
+    "priceInr": 1129,
+    "priceRange": "1000-1200",
+    "description": "Navy slim fit polo tee, breathable cotton",
+    "featured": false,
+    "vibeTags": [
+      "Streetwear",
+      "GenZ",
+      "Classic"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "T-Shirt",
+    "brandName": "Snitch",
+    "productName": "Sleek Striped Black Polo T-Shirt",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0420/7073/7058/files/4MST2242-01-M31.jpg?v=1755866442&quality=80",
+    "websiteLink": "https://www.snitch.com/men-t-shirts/sleek-striped-black-polo/8190908956834/buy",
+    "priceInr": 1129,
+    "priceRange": "1000-1200",
+    "description": "Striped black polo with bold style",
+    "featured": false,
+    "vibeTags": [
+      "Streetwear",
+      "GenZ",
+      "BoldStyle"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "T-Shirt",
+    "brandName": "Snitch",
+    "productName": "Believe Turquoise Polo T-Shirt",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0420/7073/7058/files/96507ab345172000976a9537e104543b.jpg?v=1727765311&quality=80",
+    "websiteLink": "https://www.snitch.com/men-t-shirts/believe-turquoise-polo-t-shirt-4mst2522-01/8503613554850/buy",
+    "priceInr": 790,
+    "priceRange": "700-900",
+    "description": "Vibrant turquoise polo tee, perfect for Gen Z",
+    "featured": false,
+    "vibeTags": [
+      "Streetwear",
+      "GenZ",
+      "Colorful"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "T-Shirt",
+    "brandName": "Snitch",
+    "productName": "Raw Edge Mustard T-Shirt",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0420/7073/7058/files/4MST0217-0321.jpg?v=1724302539&quality=80",
+    "websiteLink": "https://www.snitch.com/men-t-shirts/raw-edge-mustard-t-shirt/7235451551906/buy",
+    "priceInr": 510,
+    "priceRange": "400-600",
+    "description": "Mustard raw edge tee with trendy aesthetic",
+    "featured": true,
+    "vibeTags": [
+      "Streetwear",
+      "GenZ",
+      "Trendy"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "T-Shirt",
+    "brandName": "Snitch",
+    "productName": "Raw Edge Military Green T-Shirt",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0420/7073/7058/files/4MST0217-0614.jpg?v=1724302654&quality=80",
+    "websiteLink": "https://www.snitch.com/men-t-shirts/raw-edge-military-green-t-shirt/7235453124770/buy",
+    "priceInr": 599,
+    "priceRange": "500-700",
+    "description": "Military green raw edge tee, ultra cool Gen Z vibe",
+    "featured": true,
+    "vibeTags": [
+      "Streetwear",
+      "GenZ",
+      "Edgy"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "Jeans",
+    "brandName": "WTF (Witnessing True Fashion)",
+    "productName": "W.T.F. Men Smart Pure Cotton Relaxed Fit Mid-Rise Jeans",
+    "imageUrl": "https://www.wtfwardrobe.com/cdn/shop/files/Screenshot_2025-02-20_185047.png?v=1740057686&width=823",
+    "websiteLink": "https://www.wtfwardrobe.com/products/w-t-f-men-smart-pure-cotton-relaxed-fit-mid-rise-jeans",
+    "priceInr": 1199,
+    "priceRange": "1100-1300",
+    "description": "Relaxed fit mid-rise jeans, dark shade non-fade pure cotton",
+    "featured": true,
+    "vibeTags": [
+      "Streetwear",
+      "GenZ",
+      "CasualWear"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "Pants",
+    "brandName": "GENRAGE",
+    "productName": "Scripture Grey Unisex Straight Fit Baggy Pants",
+    "imageUrl": "https://genrage.com/cdn/shop/files/Scripture_Grey_Unisex_Straight_Fit_Baggy_Pants_front.png?v=1766406542&width=1000",
+    "websiteLink": "https://genrage.com/products/scripture-grey-unisex-straight-fit-baggy-pants",
+    "priceInr": 1699,
+    "priceRange": "1600-1800",
+    "description": "Grey unisex baggy pants with scripture motif graphic design",
+    "featured": true,
+    "vibeTags": [
+      "Streetwear",
+      "BaggyFit",
+      "GenZ"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "Pants",
+    "brandName": "GENRAGE",
+    "productName": "Wraeth Unisex Straight Fit Baggy Pants",
+    "imageUrl": "https://genrage.com/cdn/shop/files/WraethBaggyPants_checked.png?v=1773129290&width=1000",
+    "websiteLink": "https://genrage.com/products/wraeth-unisex-straight-fit-baggy-pants",
+    "priceInr": 1699,
+    "priceRange": "1600-1800",
+    "description": "Black oversized baggy pants with gothic graphic embroidery",
+    "featured": true,
+    "vibeTags": [
+      "Streetwear",
+      "OversizedFit",
+      "BudgetFriendly"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "Pants",
+    "brandName": "GENRAGE",
+    "productName": "Stryk Grey Unisex Straight Fit Baggy Pants",
+    "imageUrl": "https://genrage.com/cdn/shop/files/Stryk_Grey_Unisex_Straight_Fit_Baggy_Pants_front.png?v=1768297531&width=1000",
+    "websiteLink": "https://genrage.com/products/stryk-grey-unisex-straight-fit-baggy-pants",
+    "priceInr": 1699,
+    "priceRange": "1600-1800",
+    "description": "Grey straight fit baggy pants with mystical graphic design",
+    "featured": false,
+    "vibeTags": [
+      "Streetwear",
+      "BaggyFit",
+      "Minimalist"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "Pants",
+    "brandName": "GENRAGE",
+    "productName": "Kong Unisex Straight Baggy Pants",
+    "imageUrl": "https://res.cloudinary.com/dbxwiln0a/image/upload/v1773162031/q9b1yqhrcvxtxizyjpid.png",
+    "websiteLink": "https://genrage.com/products/witch-unisex-straight-fit-baggy-pants",
+    "priceInr": 1699,
+    "priceRange": "1600-1800",
+    "description": "Black baggy pants with red graphic print, unisex sizing",
+    "featured": false,
+    "vibeTags": [
+      "Streetwear",
+      "GraphicDesign",
+      "UnisexWear"
+    ]
+  },
+  {
+    "category": "Y2K Fashion",
+    "productType": "T-Shirt",
+    "brandName": "GENRAGE",
+    "productName": "Crimson Black Boxy Oversized T-Shirt",
+    "imageUrl": "https://res.cloudinary.com/dbxwiln0a/image/upload/v1773161884/jwpnrhdszsnfcckcumxz.png",
+    "websiteLink": "https://genrage.com/products/crimson-black-boxy-oversized-tshirt",
+    "priceInr": 1299,
+    "priceRange": "1200-1400",
+    "description": "Black boxy oversized tee with crimson graphic artwork",
+    "featured": true,
+    "vibeTags": [
+      "Y2K",
+      "OversizedFit",
+      "GraphicTee"
+    ]
+  },
+  {
+    "category": "Y2K Fashion",
+    "productType": "T-Shirt",
+    "brandName": "GENRAGE",
+    "productName": "Ghost Boxy Oversized T-Shirt",
+    "imageUrl": "https://genrage.com/cdn/shop/files/Ghost_Boxy_Oversized_Tshirt_front.png?v=1772718154&width=1000",
+    "websiteLink": "https://genrage.com/products/ghost-boxy-oversized-tshirt",
+    "priceInr": 1299,
+    "priceRange": "1200-1400",
+    "description": "White oversized boxy tee with ghost deity graphic print",
+    "featured": true,
+    "vibeTags": [
+      "Y2K",
+      "Oversized",
+      "GenZ"
+    ]
+  },
+  {
+    "category": "Y2K Fashion",
+    "productType": "T-Shirt",
+    "brandName": "GENRAGE",
+    "productName": "Oath Black Boxy Oversized T-Shirt",
+    "imageUrl": "https://res.cloudinary.com/dbxwiln0a/image/upload/v1773161884/jwpnrhdszsnfcckcumxz.png",
+    "websiteLink": "https://genrage.com/products/oath-black-boxy-oversized-tshirt",
+    "priceInr": 1299,
+    "priceRange": "1200-1400",
+    "description": "Black oversized boxy tee with sacred oath graphic design",
+    "featured": false,
+    "vibeTags": [
+      "Y2K",
+      "OversizedAesthetic",
+      "GenZStyle"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "T-Shirt",
+    "brandName": "Urban Monkey",
+    "productName": "Amigoz Oversized T-Shirt",
+    "imageUrl": "https://www.urbanmonkey.com/cdn/shop/files/2_2480e324-e2b4-4fdb-bfd1-d5826ae2d02a.png?v=1770009303&width=900",
+    "websiteLink": "https://www.urbanmonkey.com/products/amigoz",
+    "priceInr": 1199,
+    "priceRange": "1100-1300",
+    "description": "Cream white oversized tee with chenille character embroidery",
+    "featured": true,
+    "vibeTags": [
+      "Streetwear",
+      "OversizedFit",
+      "HipHopStyle"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "T-Shirt",
+    "brandName": "Urban Monkey",
+    "productName": "Leggo Monkey Oversized T-Shirt",
+    "imageUrl": "https://www.urbanmonkey.com/cdn/shop/files/3_cb8c642c-5bbb-4314-b62d-58c62a2e0b9c.png?v=1770006440&width=900",
+    "websiteLink": "https://www.urbanmonkey.com/products/leggo-monkey",
+    "priceInr": 1099,
+    "priceRange": "1000-1200",
+    "description": "White oversized tee with Lego-inspired monkey graphic print",
+    "featured": true,
+    "vibeTags": [
+      "Streetwear",
+      "Playful",
+      "OversizedTee"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "T-Shirt",
+    "brandName": "Urban Monkey",
+    "productName": "Monkeyverse Oversized T-Shirt",
+    "imageUrl": "https://www.urbanmonkey.com/cdn/shop/files/WEB_RES_images_for_um_website_02_08f928a3-5b25-4433-8949-cdb9f806fdaa.png?v=1770026938&width=900",
+    "websiteLink": "https://www.urbanmonkey.com/products/monkeyverse",
+    "priceInr": 1199,
+    "priceRange": "1100-1300",
+    "description": "Black oversized tee with colorful monkeyverse character graphic",
+    "featured": true,
+    "vibeTags": [
+      "Streetwear",
+      "GraphicTee",
+      "GenZ"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "T-Shirt",
+    "brandName": "Urban Monkey",
+    "productName": "Here Now Oversized T-Shirt",
+    "imageUrl": "https://www.urbanmonkey.com/cdn/shop/files/here-now-25tsbf3-be-xs-511765.jpg?v=1749881846&width=900",
+    "websiteLink": "https://www.urbanmonkey.com/products/here-now",
+    "priceInr": 1099,
+    "priceRange": "1000-1200",
+    "description": "Beige oversized tee with minimalist here now graphic design",
+    "featured": false,
+    "vibeTags": [
+      "Streetwear",
+      "Minimalist",
+      "BudgetFriendly"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "T-Shirt",
+    "brandName": "Urban Monkey",
+    "productName": "Stallions By Bhaukal Oversized T-Shirt",
+    "imageUrl": "https://www.urbanmonkey.com/cdn/shop/files/UM_8th_Aug_1679.jpg?v=1758095546&width=900",
+    "websiteLink": "https://www.urbanmonkey.com/products/stallions-by-bhaukal",
+    "priceInr": 1199,
+    "priceRange": "1100-1300",
+    "description": "Cream oversized tee with stallions graphic art by Bhaukal",
+    "featured": false,
+    "vibeTags": [
+      "Streetwear",
+      "ArtisticDesign",
+      "OversizedFit"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "Oversized T-Shirt",
+    "brandName": "Genrage",
+    "productName": "Crimson Black Boxy Oversized Tshirt",
+    "imageUrl": "https://genrage.com/cdn/shop/files/front_4faa675e-99a4-4d1b-82a4-7296bb577af5.png?v=1770982147&width=1000",
+    "websiteLink": "https://genrage.com/products/crimson-black-boxy-oversized-tshirt",
+    "priceInr": 1299,
+    "priceRange": "1299-1699",
+    "description": "240 GSM Cotton Terry, Crewneck Drop Shoulders, Boxy Oversized Fit, Black Color, Biowashed Combed Hypo-Allergenic Fabric, GOTS Certified",
+    "featured": true,
+    "vibeTags": [
+      "Streetwear",
+      "GenZ",
+      "Oversized",
+      "Indian-Brand",
+      "Goth"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "Relaxed Fit Jeans",
+    "brandName": "W.T.F (Witnessing True Fashion)",
+    "productName": "Men Smart Pure Cotton Relaxed Fit Mid-Rise Jeans",
+    "imageUrl": "https://www.wtfwardrobe.com/cdn/shop/files/Screenshot_2025-02-20_185047.png?v=1740057686&width=823",
+    "websiteLink": "https://www.wtfwardrobe.com/products/w-t-f-men-smart-pure-cotton-relaxed-fit-mid-rise-jeans",
+    "priceInr": 1199,
+    "priceRange": "1199-4399",
+    "description": "Pure Cotton Relaxed Fit Mid-Rise, Sizes 28-38, Gen Z Affordable Streetwear, Low Stock (3 left)",
+    "featured": true,
+    "vibeTags": [
+      "Streetwear",
+      "GenZ",
+      "Denim",
+      "Indian-Brand",
+      "BudgetFriendly"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "Oversized T-Shirt",
+    "brandName": "Urban Monkey",
+    "productName": "Amigoz Oversized T-Shirt for Men",
+    "imageUrl": "https://www.urbanmonkey.com/cdn/shop/files/2_2480e324-e2b4-4fdb-bfd1-d5826ae2d02a.png?v=1770009303&width=900",
+    "websiteLink": "https://www.urbanmonkey.com/products/amigoz",
+    "priceInr": 1199,
+    "priceRange": "999-1499",
+    "description": "100% Cotton 220 GSM, Cream White, Oversized, Round Neck, Half Sleeves, Chenille Embroidery Front, HD Digital Print Back, Made in India",
+    "featured": true,
+    "vibeTags": [
+      "Streetwear",
+      "GenZ",
+      "Oversized",
+      "Indian-Brand",
+      "Embroidery"
+    ]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "Denim Jacket",
+    "brandName": "Carhartt WIP (via Capsul)",
+    "productName": "Aden Chore Coat",
+    "imageUrl": "https://www.shopcapsul.com/cdn/shop/files/hve_600x.jpg?v=1772102556",
+    "websiteLink": "https://www.shopcapsul.com/products/aden-chore-coat",
+    "priceInr": 21000,
+    "priceRange": "18000-24000",
+    "description": "Premium Denim Chore Coat with Multiple Pockets, Carhartt Quality, Sizes M-L, Curated Premium Streetwear",
+    "featured": false,
+    "vibeTags": [
+      "Streetwear",
+      "Outerwear",
+      "Premium",
+      "Denim",
+      "CuratedByCapsul"
+    ]
+  },
+  {
+    "category": "Sneakers",
+    "productType": "Casual Sneaker",
+    "brandName": "Comet",
+    "productName": "X Lows REWIND Sneaker",
+    "imageUrl": "https://www.wearcomet.com/cdn/shop/t/116/assets/cream-red_280x.png?v=108592255860673641471772439917",
+    "websiteLink": "https://www.wearcomet.com/products/x-lows-rewind",
+    "priceInr": 4299,
+    "priceRange": "3999-4899",
+    "description": "Limited Edition Indian Sneaker, Hand-Lasted, Multiple Colors, UK Sizes 3-12, Made in India, New Launch",
+    "featured": true,
+    "vibeTags": [
+      "Sneakers",
+      "GenZ",
+      "MadeInIndia",
+      "LimitedEdition",
+      "Homegrown"
+    ]
+  },
+
+
+
+
+
+
+  {
+    "category": "Streetwear",
+    "productType": "T-Shirt",
+    "brandName": "No FOMO Studio",
+    "productName": "Kanha Is Watching My Back Oversized T-Shirt | DHARMA",
+    "imageUrl": "https://www.nofomostudio.com/cdn/shop/files/Black_6223e3c2-ae6c-4893-8396-3e55059ad92f.png?v=1770480412&width=600",
+    "websiteLink": "https://www.nofomostudio.com/products/kanha-is-watching-my-back-oversized-t-shirt-dharma-no-fomo",
+    "priceInr": 999,
+    "priceRange": "900-1100",
+    "description": "Mythological oversized tee with spiritual Kanha design and Gen Z appeal.",
+    "featured": true,
+    "vibeTags": ["Streetwear", "Spiritual", "Oversized"]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "T-Shirt",
+    "brandName": "No FOMO Studio",
+    "productName": "EYES OF BHAKTI | DHARMA",
+    "imageUrl": "https://www.nofomostudio.com/cdn/shop/files/Black_male_c972c937-ccda-4207-a2b3-70f52a2d7641.png?v=1772607849&width=600",
+    "websiteLink": "https://www.nofomostudio.com/products/eyes-of-bhakti",
+    "priceInr": 899,
+    "priceRange": "800-1000",
+    "description": "Multi-colored graphic tee celebrating Hindu mythology with Gen Z streetwear flair.",
+    "featured": true,
+    "vibeTags": ["Streetwear", "Graphic", "Cultural"]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "T-Shirt",
+    "brandName": "No FOMO Studio",
+    "productName": "BROKE Oversized Classic T-Shirt",
+    "imageUrl": "https://www.nofomostudio.com/cdn/shop/files/ChatGPT_Image_Jan_31_2026_03_16_56_AM.png?v=1770480057&width=600",
+    "websiteLink": "https://www.nofomostudio.com/products/unisex-oversized-standard-t-shirt-3",
+    "priceInr": 999,
+    "priceRange": "900-1100",
+    "description": "Humorous oversized tee with relatable millennial message about employment.",
+    "featured": true,
+    "vibeTags": ["GenZ", "Humor", "Oversized"]
+  },
+  {
+    "category": "Y2K Fashion",
+    "productType": "T-Shirt",
+    "brandName": "No FOMO Studio",
+    "productName": "Her Era Oversized Tee",
+    "imageUrl": "https://www.nofomostudio.com/cdn/shop/files/Her_Era_Main.png?v=1768587507&width=600",
+    "websiteLink": "https://www.nofomostudio.com/products/her-era-oversized-tee",
+    "priceInr": 899,
+    "priceRange": "800-1000",
+    "description": "Women-centric oversized tee with lip print pattern and Y2K aesthetic vibe.",
+    "featured": true,
+    "vibeTags": ["Y2K", "Oversized", "Feminine"]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "Hoodie",
+    "brandName": "No FOMO Studio",
+    "productName": "Classic Drip Hoodie",
+    "imageUrl": "https://www.nofomostudio.com/cdn/shop/files/11.png?v=1765218698&width=600",
+    "websiteLink": "https://www.nofomostudio.com/products/unisex-oversized-hoodie",
+    "priceInr": 1349,
+    "priceRange": "1300-1500",
+    "description": "Premium oversized hoodie with bold yellow lightning bolt graphic streetwear design.",
+    "featured": true,
+    "vibeTags": ["Streetwear", "Hoodie", "Oversized"]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "T-Shirt",
+    "brandName": "No FOMO Studio",
+    "productName": "Blossom – Oversized T-Shirt: Her Era",
+    "imageUrl": "https://www.nofomostudio.com/cdn/shop/files/blossom_4_73b435c7-3c0c-40f2-9429-0cebd1f54448.png?v=1768626194&width=600",
+    "websiteLink": "https://www.nofomostudio.com/products/blossom-oversized-t-shirt-no-fomo-her-era",
+    "priceInr": 899,
+    "priceRange": "800-1000",
+    "description": "Oversized tee with daisy blossom print representing feminininity and Y2K aesthetics.",
+    "featured": false,
+    "vibeTags": ["Y2K", "Floral", "Oversized"]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "T-Shirt",
+    "brandName": "No FOMO Studio",
+    "productName": "Essential Unisex Poly-Cotton T-Shirt (180 GSM)",
+    "imageUrl": "https://www.nofomostudio.com/cdn/shop/files/Left_Pocket_3_c_2_4de895af-6e87-4138-a59f-684b8cad0e77.jpg?v=1769148944&width=600",
+    "websiteLink": "https://www.nofomostudio.com/products/essential-unisex-poly-cotton-t-shirt-180-gsm-no-fomo-studio",
+    "priceInr": 499,
+    "priceRange": "400-600",
+    "description": "Budget-friendly unisex poly-cotton tee perfect for everyday casual streetwear.",
+    "featured": false,
+    "vibeTags": ["BudgetFit", "Minimal", "Unisex"]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "T-Shirt",
+    "brandName": "No FOMO Studio",
+    "productName": "Lion of Swarajya – Oversized Cotton T-Shirt | DHARMA Collection",
+    "imageUrl": "https://www.nofomostudio.com/cdn/shop/files/Black_male_c39f2dd9-3dd4-406b-bc64-0173c66ea6e4.png?v=1771445152&width=600",
+    "websiteLink": "https://www.nofomostudio.com/products/lion-of-swarajya-oversized-cotton-t-shirt-dharma-collection-no-fomo-studio",
+    "priceInr": 899,
+    "priceRange": "800-1000",
+    "description": "Oversized cotton tee celebrating Indian history and cultural pride with modern Gen Z",
+    "featured": true,
+    "vibeTags": ["Streetwear", "Cultural", "Oversized"]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "T-Shirt",
+    "brandName": "No FOMO Studio",
+    "productName": "Overthinking – Professional Since Forever",
+    "imageUrl": "https://www.nofomostudio.com/cdn/shop/files/Maroon.png?v=1771800445&width=600",
+    "websiteLink": "https://www.nofomostudio.com/products/overthinking-professional-since-forever-no-fomo-studio",
+    "priceInr": 899,
+    "priceRange": "800-1000",
+    "description": "Humorous relatable tee celebrating millennial and Gen Z anxiety with streetwear flair.",
+    "featured": false,
+    "vibeTags": ["GenZ", "Humor", "Minimalist"]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "T-Shirt",
+    "brandName": "JNORSS",
+    "productName": "Guts Designed B&G Long Sleeve T-shirt",
+    "imageUrl": "https://www.jnorss.in/cdn/shop/files/B_e9a0fbba-716e-4138-b43a-b6c75273ef60.jpg?v=1773327306&width=410",
+    "websiteLink": "https://www.jnorss.in/products/guts-designed-b-g-long-sleeve-t-shirt",
+    "priceInr": 999,
+    "priceRange": "900-1100",
+    "description": "Anime graphic long sleeve tee featuring Berserk character with streetwear aesthetic.",
+    "featured": true,
+    "vibeTags": ["Anime", "Streetwear", "Graphic"]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "T-Shirt",
+    "brandName": "JNORSS",
+    "productName": "Nirvana LS Oversized Tee",
+    "imageUrl": "https://www.jnorss.in/cdn/shop/files/B_502ec895-c5be-4762-84ba-b644bbb6d041.jpg?v=1773327187&width=410",
+    "websiteLink": "https://www.jnorss.in/products/nirvana-ls-oversized-tee",
+    "priceInr": 999,
+    "priceRange": "900-1100",
+    "description": "Vintage band graphic oversized long sleeve tee celebrating 90s grunge culture.",
+    "featured": true,
+    "vibeTags": ["Streetwear", "Band", "Oversized"]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "T-Shirt",
+    "brandName": "JNORSS",
+    "productName": "Jujutsu Kaisen – Gojo's Wrath LS Tee",
+    "imageUrl": "https://www.jnorss.in/cdn/shop/files/BMOCKUP_8f0712ba-deb7-44e6-9d63-12034852e45c.png?v=1773327356&width=410",
+    "websiteLink": "https://www.jnorss.in/products/jujutsu-kaisen-gojo-s-wrath-tee",
+    "priceInr": 999,
+    "priceRange": "900-1100",
+    "description": "Anime fan art long sleeve tee featuring Jujutsu Kaisen character with street aesthetic.",
+    "featured": true,
+    "vibeTags": ["Anime", "Streetwear", "PopCulture"]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "T-Shirt",
+    "brandName": "JNORSS",
+    "productName": "Slipknot LS Oversized Tee",
+    "imageUrl": "https://www.jnorss.in/cdn/shop/files/F_ed29e3f3-b8c6-4e89-9df4-8b0f947732d2.jpg?v=1773327168&width=410",
+    "websiteLink": "https://www.jnorss.in/products/slipknot-ls-oversized-tee",
+    "priceInr": 999,
+    "priceRange": "900-1100",
+    "description": "Heavy metal band graphic oversized long sleeve tee with dark streetwear aesthetic.",
+    "featured": false,
+    "vibeTags": ["Streetwear", "Band", "Oversized"]
+  },
+  {
+    "category": "Streetwear",
+    "productType": "T-Shirt",
+    "brandName": "No FOMO Studio",
+    "productName": "RADHE RADHE: Oversized T-Shirt",
+    "imageUrl": "https://www.nofomostudio.com/cdn/shop/files/Black.png?v=1770122684&width=600",
+    "websiteLink": "https://www.nofomostudio.com/products/radhe-radhe-oversized-t-shirt-no-fomo-studio",
+    "priceInr": 999,
+    "priceRange": "900-1100",
+    "description": "Spiritual oversized tee celebrating Krishna with modern streetwear design philosophy.",
+    "featured": true,
+    "vibeTags": ["Streetwear", "Spiritual", "Oversized"]
+  },
+
+    {
+      "category": "Streetwear",
+      "productType": "T-Shirt",
+      "brandName": "THE EMRYO STORE",
+      "productName": "52 APPLIQUE EMBROIDERY OVER-SIZED T SHIRT",
+      "imageUrl": "https://theemryostore.com/cdn/shop/files/hf_20260313_211252_6eb6f7c4-0069-4f47-af43-696f6237167d.jpg",
+      "websiteLink": "https://theemryostore.com/products/52-applique-embroidery-over-sized-t-shirt?variant=48365348716763",
+      "priceInr": 1999,
+      "priceRange": "1800-2200",
+      "description": "Bold 52 embroidery design for risk-takers who love strategy and game thrills",
+      "featured": true,
+      "vibeTags": ["OversizedFit", "PremiumEmbroidery", "BoxyFit"]
+    },
+    {
+      "category": "Streetwear",
+      "productType": "T-Shirt",
+      "brandName": "THE EMRYO STORE",
+      "productName": "ROYAL SPADE EMBROIDERY OVER-SIZED T SHIRT",
+      "imageUrl": "https://theemryostore.com/cdn/shop/files/htgfg.jpg",
+      "websiteLink": "https://theemryostore.com/products/royal-spade-%E2%99%A0%EF%B8%8F-embroidery-over-sized-t-shirt?variant=48365242974427",
+      "priceInr": 1999,
+      "priceRange": "1800-2200",
+      "description": "Spade symbol embroidery tee for power and fearless confident streetwear lovers",
+      "featured": true,
+      "vibeTags": ["OversizedFit", "RoyalDesign", "Embroidery"]
+    },
+    {
+      "category": "Streetwear",
+      "productType": "T-Shirt",
+      "brandName": "THE EMRYO STORE",
+      "productName": "CRABS APPLIQUE EMBROIDERY OVER-SIZED T SHIRT",
+      "imageUrl": "https://theemryostore.com/cdn/shop/files/ythyhfghf.jpg",
+      "websiteLink": "https://theemryostore.com/products/crabs-embroidery-over-sized-t-shirt?variant=48365275021531",
+      "priceInr": 999,
+      "priceRange": "800-1100",
+      "description": "Crabs applique embroidery tee representing resilience and grind beneath surface",
+      "featured": true,
+      "vibeTags": ["Sale", "OversizedFit", "AppliqueDesign"]
+    },
+    {
+      "category": "Streetwear",
+      "productType": "T-Shirt",
+      "brandName": "THE EMRYO STORE",
+      "productName": "TOUCAN BIRD EMBROIDERY OVER-SIZED T SHIRT",
+      "imageUrl": "https://theemryostore.com/cdn/shop/files/thdysd.jpg",
+      "websiteLink": "https://theemryostore.com/products/tucon-bird-embroidery-over-sized-t-shirt?variant=48365243433179",
+      "priceInr": 1999,
+      "priceRange": "1800-2200",
+      "description": "Vibrant toucan bird embroidery on oversized tee for nature-inspired streetwear fans",
+      "featured": false,
+      "vibeTags": ["OversizedFit", "BirdDesign", "Embroidery"]
+    },
+    {
+      "category": "Streetwear",
+      "productType": "T-Shirt",
+      "brandName": "THE EMRYO STORE",
+      "productName": "EMRYO SNAKE EMBROIDERY OVER-SIZED T SHIRT",
+      "imageUrl": "https://theemryostore.com/cdn/shop/files/5ty5ggtffbf.jpg",
+      "websiteLink": "https://theemryostore.com/products/emryo-snake-embroidery-over-sized-t-shirt?variant=48365257457883",
+      "priceInr": 1999,
+      "priceRange": "1800-2200",
+      "description": "Snake embroidery oversized tee for edgy streetwear enthusiasts who love mystique",
+      "featured": false,
+      "vibeTags": ["OversizedFit", "SnakeDesign", "Embroidery"]
+    },
+    {
+      "category": "Streetwear",
+      "productType": "T-Shirt",
+      "brandName": "DARKBUCK",
+      "productName": "ROYAL HEM OVERSIZED FIT T-SHIRT",
+      "imageUrl": "https://darkbuck.in/cdn/shop/files/mandala1.jpg",
+      "websiteLink": "https://darkbuck.in/products/royal-hem-oversized-fit-t-shirt",
+      "priceInr": 1299,
+      "priceRange": "1100-1500",
+      "description": "White oversized tee with royal mandala hem design for minimalist dark streetwear fans",
+      "featured": true,
+      "vibeTags": ["OversizedFit", "MandalaPrint", "MinimalDesign"]
+    },
+    {
+      "category": "Streetwear",
+      "productType": "T-Shirt",
+      "brandName": "WHAT THE FIT",
+      "productName": "MONSTER ENERGY - WHITE OVERSIZED TEE",
+      "imageUrl": "https://wtfit.in/cdn/shop/files/rn-image_picker_lib_temp_33a20d68-f133-49bc-a257-87e47733fb17.png",
+      "websiteLink": "https://wtfit.in/products/monster-energy-white-oversized-tee?variant=43074848358489",
+      "priceInr": 999,
+      "priceRange": "800-1100",
+      "description": "White oversized graphic tee with Monster Energy print for bold Gen Z street style",
+      "featured": true,
+      "vibeTags": ["Sale", "GraphicPrint", "OversizedFit"]
+    }
+
+]
+
