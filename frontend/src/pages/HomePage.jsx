@@ -1,163 +1,263 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useOutletContext } from 'react-router-dom';
-import { fetchTrends, fetchStats, fetchCategories, fetchRisingTrends, isBackendOffline } from '../api/client';
-import { getSessionId } from '../utils/session';
-import TrendCard from '../components/TrendCard';
-import FilterBar from '../components/FilterBar';
-import StatsCard from '../components/StatsCard';
-import SkeletonCard from '../components/SkeletonCard';
+import { useQuery } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
+import useFilterStore from '../store/filterStore';
+import { getHeroTrend, getTrendStats, getTrends } from '../api/trends';
+import { getCurated } from '../api/curated';
+import { getAffiliateLink, trackClick } from '../api/affiliate';
+
+// Components
+import Navbar from '../components/layout/Navbar';
+import TickerBar from '../components/layout/TickerBar';
+import Footer from '../components/layout/Footer';
+import VibeFilter from '../components/ui/VibeFilter';
+import ScrollRow from '../components/ui/ScrollRow';
+import ErrorState from '../components/ui/ErrorState';
+import VelocityBadge from '../components/ui/VelocityBadge';
+import ScoreRing from '../components/ui/ScoreRing';
 
 export default function HomePage() {
-    const { searchTerm } = useOutletContext();
-    const [trends, setTrends] = useState([]);
-    const [stats, setStats] = useState(null);
-    const [risingCount, setRisingCount] = useState(0);
-    const [filters, setFilters] = useState([{ value: '', label: 'All' }]);
-    const [loading, setLoading] = useState(true);
-    const [activeFilter, setActiveFilter] = useState('');
-    const [indiaOnly, setIndiaOnly] = useState(false);
-    const [offline, setOffline] = useState(false);
+  const [searchParams] = useSearchParams();
+  const { activeVibe } = useFilterStore();
+  
+  // Local state for Hero button
+  const [heroBuyLoading, setHeroBuyLoading] = useState(false);
 
-    useEffect(() => {
-        (async () => {
-            const [statsData, categories, rising] = await Promise.all([
-                fetchStats(), fetchCategories(), fetchRisingTrends()
-            ]);
-            setStats(statsData);
-            setRisingCount(rising.length);
-            setOffline(isBackendOffline());
-            const catFilters = categories.map(c => ({ value: c.toLowerCase(), label: c.charAt(0).toUpperCase() + c.slice(1) }));
-            setFilters([{ value: '', label: 'All' }, ...catFilters]);
-        })();
-    }, []);
+  // Queries
+  const { 
+    data: hero, 
+    isLoading: heroLoading, 
+    isError: heroError, 
+    refetch: refetchHero 
+  } = useQuery({ queryKey: ['hero'], queryFn: getHeroTrend });
 
-    useEffect(() => { loadTrends(); }, [activeFilter, indiaOnly]);
+  const { 
+    data: stats, 
+    isLoading: statsLoading, 
+    isError: statsError 
+  } = useQuery({ queryKey: ['stats'], queryFn: getTrendStats });
 
-    const loadTrends = async () => {
-        setLoading(true);
-        const params = { sessionId: getSessionId() };
-        if (activeFilter) params.category = activeFilter;
-        if (indiaOnly) params.indiaRelevant = true;
-        const data = await fetchTrends(params);
-        setTrends(data);
-        setOffline(isBackendOffline());
-        setLoading(false);
-    };
+  const vibeParam = activeVibe === 'All' ? null : activeVibe;
 
-    const filteredTrends = useMemo(() => {
-        if (!searchTerm) return trends;
-        const t = searchTerm.toLowerCase();
-        return trends.filter(tr =>
-            tr.productName?.toLowerCase().includes(t) ||
-            tr.category?.toLowerCase().includes(t) ||
-            tr.brandMention?.toLowerCase().includes(t)
-        );
-    }, [trends, searchTerm]);
+  const { 
+    data: trendingData, 
+    isLoading: trendingLoading, 
+    isError: trendingError, 
+    refetch: refetchTrending 
+  } = useQuery({ 
+    queryKey: ['trending', activeVibe], 
+    queryFn: () => getTrends('trending', vibeParam) 
+  });
 
-    return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Offline */}
-            {offline && (
-                <div className="mb-6 px-4 py-3 rounded-lg text-center anim-fade-in"
-                    style={{ fontSize: 12, fontWeight: 600, background: 'var(--color-amber-dim)', color: 'var(--color-amber)', border: '1px solid rgba(255,171,0,0.15)' }}>
-                    ⚠️ Backend offline — showing cached data
+  const { 
+    data: risingData, 
+    isLoading: risingLoading, 
+    isError: risingError, 
+    refetch: refetchRising 
+  } = useQuery({ 
+    queryKey: ['rising', activeVibe], 
+    queryFn: () => getTrends('rising', vibeParam) 
+  });
+
+  const { 
+    data: curatedData, 
+    isLoading: curatedLoading, 
+    isError: curatedError, 
+    refetch: refetchCurated 
+  } = useQuery({ 
+    queryKey: ['curated-home', activeVibe], 
+    queryFn: () => getCurated(vibeParam, null) 
+  });
+
+  const handleHeroBuy = async () => {
+    if (!hero) return;
+    setHeroBuyLoading(true);
+    try {
+      const { affiliateUrl } = await getAffiliateLink(hero.id, hero.platform);
+      window.open(affiliateUrl, '_blank', 'noopener,noreferrer');
+      trackClick(hero.id, hero.platform, 'hero_banner');
+    } catch (err) {
+      toast.error('Could not get product link. Try again.');
+    } finally {
+      setHeroBuyLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <TickerBar />
+      <Navbar />
+
+      <main className="flex-1">
+        {/* HERO SECTION */}
+        {heroLoading ? (
+          <div className="w-full max-w-7xl mx-auto px-4 mt-8">
+            <div className="w-full h-[400px] bg-[#1a1a1a] animate-pulse rounded-2xl"></div>
+          </div>
+        ) : heroError ? (
+          <div className="w-full max-w-7xl mx-auto px-4 mt-8">
+            <ErrorState message="Could not load featured trend" onRetry={refetchHero} />
+          </div>
+        ) : hero ? (
+          <div className="w-full max-w-7xl mx-auto px-4 mt-8 mb-8">
+            <div className="relative w-full h-[400px] rounded-2xl overflow-hidden border border-border group">
+              {/* Background */}
+              {hero.imageUrl ? (
+                <div className="absolute inset-0">
+                  <img
+                    src={hero.imageUrl}
+                    alt={hero.productName}
+                    className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#080808] via-[#080808]/70 to-transparent" />
                 </div>
-            )}
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-br from-[#121212] to-[#1a1a1a]"></div>
+              )}
+              
+              {/* Overlay Gradient */}
+              <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/80 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-bg/90 via-bg/40 to-transparent"></div>
 
-            {/* ── HERO: 2-col ── */}
-            <section className="grid grid-cols-1 lg:grid-cols-5 gap-8 py-12 md:py-20">
-                {/* Left — headline */}
-                <div className="lg:col-span-3 flex flex-col justify-center">
-                    {/* Eyebrow */}
-                    <div className="flex items-center gap-3 mb-5">
-                        <div className="w-8 h-px bg-lime" />
-                        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' }}
-                            className="text-lime">AI-Powered Intelligence</span>
-                    </div>
-                    <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: 'clamp(40px, 6vw, 80px)', fontWeight: 900, letterSpacing: '-2px', lineHeight: 1.05 }}
-                        className="text-text mb-5">
-                        Discover trends{' '}
-                        <em style={{ fontStyle: 'italic', color: 'var(--color-lime)' }}>before</em>
-                        <br />they explode
-                    </h1>
-                    <p style={{ fontSize: 15, lineHeight: 1.7 }} className="text-text2 max-w-md">
-                        Real-time signals from Reddit, social media, and AI analysis — curated for the Indian market.
+              {/* Content Box */}
+              <div className="absolute inset-0 p-8 md:p-12 flex flex-col justify-end">
+                <div className="max-w-xl">
+                  <div className="flex flex-wrap items-center gap-3 mb-4">
+                    <span className="bg-lime-400 text-black font-mono font-bold text-xs uppercase tracking-widest px-3 py-1 rounded">
+                      #1 Trending
+                    </span>
+                    {hero.velocityLabel && <VelocityBadge label={hero.velocityLabel} />}
+                  </div>
+
+                  <h1 className="font-display font-black text-5xl md:text-6xl text-white tracking-tight mb-2 leading-none">
+                    {hero.productName}
+                  </h1>
+                  
+                  <div className="flex items-center gap-3 font-mono text-sm text-lime-400 uppercase tracking-wider mb-6">
+                    {hero.category && <span>{hero.category}</span>}
+                    {hero.estimatedPrice > 0 && (
+                      <>
+                        <span className="text-white/30">•</span>
+                        <span className="text-white">Est. ₹{hero.estimatedPrice}</span>
+                      </>
+                    )}
+                  </div>
+
+                  {hero.totalSignals > 0 && (
+                    <p className="font-mono text-xs text-white/50 mb-8 border-l-2 border-lime-400/50 pl-3">
+                      Detected across {hero.detectedSubreddits?.length || 0} subreddits · {hero.totalSignals} mentions
                     </p>
+                  )}
+
+                  <div className="flex items-center gap-6">
+                    <button 
+                      onClick={handleHeroBuy}
+                      disabled={heroBuyLoading}
+                      className="bg-white hover:bg-lime-400 text-black font-mono font-bold tracking-widest uppercase px-8 py-3.5 rounded-xl transition-all flex items-center gap-2"
+                    >
+                      {heroBuyLoading ? (
+                        <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin"></div>
+                      ) : (
+                        `SHOP ON ${(hero.platform || 'STORE').toUpperCase()}`
+                      )}
+                    </button>
+                    {hero.trendScore > 0 && (
+                      <div className="hidden sm:flex items-center gap-3">
+                        <ScoreRing score={hero.trendScore} size={48} strokeWidth={4} />
+                        <span className="font-mono text-xs text-white/50 uppercase tracking-wider w-16 leading-tight">
+                          Trend<br/>Score
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
 
-                {/* Right — stats panel */}
-                <div className="lg:col-span-2">
-                    <div className="glass-card overflow-hidden">
-                        {/* Top gradient line */}
-                        <div className="h-px" style={{ background: 'linear-gradient(90deg, var(--color-lime), transparent)' }} />
-                        <div className="p-5">
-                            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' }}
-                                className="text-text3 mb-3">Live Stats</p>
-                            <StatsCard icon="📡" label="Signals Collected" value={stats?.totalSignals?.toLocaleString() ?? '—'} />
-                            <StatsCard icon="🔥" label="Active Trends" value={stats?.activeTrends ?? '—'} />
-                            <StatsCard icon="🇮🇳" label="India Relevant" value={stats?.indiaRelevantCount ?? '—'} />
-                            <StatsCard icon="📊" label="Subreddits Monitored" value={stats?.subredditsMonitored ?? '—'} />
-                        </div>
-                    </div>
+        {/* VIBE FILTER */}
+        <VibeFilter />
+
+        {/* LIVE STATS BAR */}
+        {!statsError && (
+          <div className="border-b border-border bg-surface/30">
+            <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4 font-mono text-xs text-white/50 uppercase tracking-widest">
+              {statsLoading ? (
+                <div className="w-full flex justify-between animate-pulse">
+                  <div className="h-4 w-32 bg-[#1a1a1a] rounded"></div>
+                  <div className="h-4 w-32 bg-[#1a1a1a] rounded hidden sm:block"></div>
+                  <div className="h-4 w-32 bg-[#1a1a1a] rounded hidden md:block"></div>
+                  <div className="h-4 w-32 bg-[#1a1a1a] rounded hidden lg:block"></div>
                 </div>
-            </section>
+              ) : stats ? (
+                <>
+                  <div className="flex items-center gap-2">
+                    <div className="live-dot"></div>
+                    <span className="text-lime-400">Live Engine</span>
+                  </div>
+                  <div className="hidden sm:block">Signals Today: <span className="text-white">{stats.signalsToday || '—'}</span></div>
+                  <div>Trending: <span className="text-white">{stats.trendingCount || '—'}</span></div>
+                  <div className="hidden md:block">Rising: <span className="text-white">{stats.risingCount || '—'}</span></div>
+                  <div className="hidden lg:block">Subreddits: <span className="text-white">{stats.subredditsMonitored || '—'}</span></div>
+                  <div className="hidden xl:block">Updated: <span className="text-white">{stats.lastCollectionTime ? new Date(stats.lastCollectionTime).toLocaleTimeString() : '—'}</span></div>
+                </>
+              ) : null}
+            </div>
+          </div>
+        )}
 
-            {/* ── India Toggle — amber ── */}
-            <section className="rounded-xl mb-6 px-5 py-4 flex items-center justify-between gap-4"
-                style={{ background: 'var(--color-amber-dim)', border: '1px solid rgba(255,171,0,0.12)' }}>
-                <div className="flex items-center gap-3">
-                    <span style={{ fontSize: 20 }}>🇮🇳</span>
-                    <div>
-                        <p style={{ fontFamily: 'var(--font-heading)', fontSize: 14, fontWeight: 700 }} className="text-text">
-                            India Trends
-                        </p>
-                        <p style={{ fontSize: 11 }} className="text-text2 mt-0.5">Show trends relevant to the Indian market</p>
-                    </div>
-                </div>
-                <button onClick={() => setIndiaOnly(!indiaOnly)}
-                    className="relative w-11 h-6 rounded-full cursor-pointer transition-colors duration-300"
-                    style={{ background: indiaOnly ? 'var(--color-amber)' : 'var(--color-card2)' }}>
-                    <span className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300"
-                        style={{ transform: indiaOnly ? 'translateX(20px)' : 'none' }} />
-                </button>
-            </section>
+        {/* TRENDING SECTION */}
+        <ScrollRow 
+          title="Blowing Up Right Now" 
+          subtitle="The highest velocity trends across the Indian internet."
+          badge="Trending"
+          badgeColor="lime"
+          isLoading={trendingLoading}
+          isError={trendingError}
+          data={trendingData}
+          onRetry={refetchTrending}
+          featured={true}
+          source="home_trending"
+        />
 
-            {/* ── Rising banner — red tint ── */}
-            {risingCount > 0 && (
-                <section className="rounded-xl mb-6 px-5 py-4 anim-fade-up"
-                    style={{ background: 'var(--color-red-dim)', border: '1px solid rgba(255,61,87,0.1)' }}>
-                    <div className="flex items-center gap-3">
-                        <span style={{ fontSize: 18 }}>🔥</span>
-                        <div>
-                            <p style={{ fontSize: 13, fontWeight: 600 }} className="text-red">
-                                {risingCount} trends rising fast this week
-                            </p>
-                            <p style={{ fontSize: 11 }} className="text-text2 mt-0.5">
-                                These trends showed &gt;100% velocity increase week-over-week
-                            </p>
-                        </div>
-                    </div>
-                </section>
-            )}
+        {/* RISING SECTION */}
+        <ScrollRow 
+          title="Catch The Wave" 
+          subtitle="Emerging signals. Get in before everyone else does."
+          badge="Rising"
+          badgeColor="amber"
+          isLoading={risingLoading}
+          isError={risingError}
+          data={risingData}
+          onRetry={refetchRising}
+          source="home_rising"
+        />
 
-            {/* ── Filters ── */}
-            <section className="mb-6">
-                <FilterBar filters={filters} activeFilter={activeFilter} onFilterChange={setActiveFilter} />
-            </section>
-
-            {/* ── Grid ── */}
-            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-16">
-                {loading
-                    ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
-                    : filteredTrends.map((trend, i) => <TrendCard key={trend.id} trend={trend} index={i} />)
-                }
-                {!loading && filteredTrends.length === 0 && (
-                    <div className="col-span-full text-center py-20 anim-fade-in">
-                        <span className="text-3xl mb-3 block">🔍</span>
-                        <p className="text-text3" style={{ fontSize: 14 }}>No trends found</p>
-                    </div>
-                )}
-            </section>
-        </div>
-    );
+        {/* CURATED SECTION */}
+        {((curatedLoading) || (curatedData?.content?.length > 0) || (Array.isArray(curatedData) && curatedData.length > 0) || curatedError) && (
+          <div className="mt-24">
+            <div className="max-w-7xl mx-auto px-4 mb-4">
+              <div className="h-px w-full bg-gradient-to-r from-transparent via-border to-transparent"></div>
+            </div>
+            <ScrollRow 
+              title="Only On TrendZY" 
+              subtitle="Hand-picked drops from indie darlings and homegrown labels."
+              badge="Curated"
+              badgeColor="purple"
+              isLoading={curatedLoading}
+              isError={curatedError}
+              data={curatedData}
+              onRetry={refetchCurated}
+              source="home_curated"
+            />
+          </div>
+        )}
+      </main>
+      
+      <Footer />
+    </div>
+  );
 }

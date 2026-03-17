@@ -3,45 +3,49 @@ server:
 
 spring:
   application:
-    name: trendpulse
+    name: trendzy
+
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017}
+      database: trendzy
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/trendpulse
+    url: ${POSTGRES_URL:}
     username: postgres
-    password: Virendra@123
-    driver-class-name: org.postgresql.Driver
-
-  ai:
-    openai:
-      api-key: ${GROQ_API_KEY}
-      base-url: https://api.groq.com/openai
-      chat:
-        options:
-          model: llama-3.3-70b-versatile
-          temperature: 0.2
-          top-p: 0.9
+    password: ${POSTGRES_PASS}
 
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: false
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
 
-  sql:
-    init:
-      mode: always
+  ai:
+    openai:
+      api-key: ${GROQ_API_KEY:}
+      base-url: https://api.groq.com/openai
+      chat:
+        options:
+          model: llama-3.3-70b-versatile
+          stream: false
 
-# ── Reddit API Configuration ──
 reddit:
-  user-agent: "TrendPulse/1.0 (by /u/Few_Ganache_1005)"
-  subreddits: OUTFITS,femalefashionadvice,Depop,ThriftStoreHauls,streetwear,Wishlist,BuyItForLife,frugalmalefashion,deals,IndianFashion,IndiaFinance,IndianBeautyLog,bangalore,delhi,india,SkincareAddiction,MakeupAddiction,fragrance,malegrooming,AsianBeauty,GenZ,teenagers,gadgets,tech
-  collect-interval-ms: 1800000  # 30 minutes
-  posts-per-subreddit: 15
+  user-agent: "TrendZY/1.0 (by /u/Few_Ganache_1005)"
+  subreddits: "IndianFashion,IndianBeautyDeals,streetwear,SkincareAddiction,MakeupAddiction,IndianSkincareRoutine,femalefashionadvice,malefashionadvice,beauty,Hair,fragrance,Sneakers,handbags,IndianFashionAddicts,GenZFashion,Y2Kfashion,cottagecore,IndiaShoppee,frugalmalefashion,30PlusSkinCare"
 
-# ── Affiliate Configuration ──
-affiliate:
-  amazon-tag: "trendpulse-21"
-  myntra-tag: "trendpulse"
+youtube:
+  api-key: ${YOUTUBE_API_KEY:}
+
+jwt:
+  secret: ${JWT_SECRET:8y/B?E(G+KbPeShVmYq3t6w9z$C&F)H@McQfTjWnZr4u7x!A%D*G-KaPdSgUkXp2}
+  expiration: 604800000
+
+scheduler:
+  collection:
+    cron: "0 0 2 * * *"
+  analysis:
+    cron: "0 0 4 * * *"
+
+groq:
+  batch-size: 5
+  rate-limit-pause-ms: 15000
+  daily-token-limit: 95000

@@ -107,7 +107,7 @@ export default function TrendDetailPage() {
 
             {/* Header: big Playfair score + name */}
             <div className="text-center mb-12 anim-fade-up">
-                {/* Large score number — no SVG circle */}
+                {/* Large score number */}
                 <div className={`${scoreClass(score)} mb-3`}
                     style={{ fontFamily: 'var(--font-heading)', fontSize: 'clamp(72px, 12vw, 120px)', fontWeight: 900, lineHeight: 1 }}>
                     {score.toFixed(1)}
@@ -119,8 +119,26 @@ export default function TrendDetailPage() {
                 </h1>
             </div>
 
+            {/* ── Product Image (if available) ── */}
+            {trend.imageUrl && (
+                <section className="mb-10 anim-fade-up s2">
+                    <div className="trend-detail-image">
+                        <img
+                            src={trend.imageUrl}
+                            alt={trend.productName}
+                            onError={(e) => { e.target.parentElement.style.display = 'none'; }}
+                        />
+                        {trend.imageSource && (
+                            <span className="trend-detail-img-source">
+                                Image from {trend.imageSource === 'amazon' ? 'Amazon' : trend.imageSource === 'myntra' ? 'Myntra' : trend.imageSource}
+                            </span>
+                        )}
+                    </div>
+                </section>
+            )}
+
             {/* AI Analysis */}
-            <section className="glass-card p-6 mb-8 anim-fade-up s2">
+            <section className="glass-card p-6 mb-8 anim-fade-up s3">
                 <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' }}
                     className="text-lime mb-3">AI Analysis</p>
                 {trend.aiExplanation ? (
@@ -133,7 +151,7 @@ export default function TrendDetailPage() {
             </section>
 
             {/* Stats — horizontal row */}
-            <section className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8 anim-fade-up s3">
+            <section className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8 anim-fade-up s4">
                 {statsRow.map(st => (
                     <div key={st.label} className="glass-card p-4 text-center">
                         <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1.5, textTransform: 'uppercase' }}
@@ -148,7 +166,7 @@ export default function TrendDetailPage() {
 
             {/* Tags */}
             {(tags.length > 0 || trend.indiaRelevant) && (
-                <section className="flex flex-wrap gap-2 mb-8 anim-fade-up s4">
+                <section className="flex flex-wrap gap-2 mb-8 anim-fade-up s5">
                     {tags.map(tag => (
                         <span key={tag.text}
                             style={{ fontSize: 11, padding: '5px 12px', borderRadius: 8, background: 'var(--color-card2)', border: '1px solid var(--color-border)' }}
@@ -162,19 +180,22 @@ export default function TrendDetailPage() {
             )}
 
             {/* Buy links */}
-            <section className="mb-12 anim-fade-up s5">
+            <section className="mb-12 anim-fade-up s6">
                 <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' }}
                     className="text-text3 mb-4">Shop Now</p>
                 {hasLinks ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {trend.productLinks.map((link, i) => (
-                            <button key={link.id || link.platform} onClick={() => handleBuy(link)}
-                                className={`py-3 px-4 rounded-lg font-semibold cursor-pointer transition-all duration-200 ${i === 0 ? 'btn-primary' : 'btn-secondary'
-                                    }`}
-                                style={{ fontSize: 12 }}>
-                                {link.platform === 'Amazon' ? 'Buy on Amazon' : `Shop ${link.platform}`}
-                            </button>
-                        ))}
+                        {trend.productLinks.map((link, i) => {
+                            const buyUrl = (i === 0 && trend.directProductUrl) ? trend.directProductUrl : link.affiliateUrl;
+                            return (
+                                <button key={link.id || link.platform}
+                                    onClick={() => { recordBuyClick(getSessionId(), trend.id); window.open(buyUrl, '_blank'); }}
+                                    className={`py-3 px-4 rounded-lg font-semibold cursor-pointer transition-all duration-200 ${i === 0 ? 'btn-primary' : 'btn-secondary'}`}
+                                    style={{ fontSize: 12 }}>
+                                    {link.platform === 'Amazon' ? 'Buy on Amazon' : `Shop ${link.platform}`}
+                                </button>
+                            );
+                        })}
                     </div>
                 ) : (
                     <div className="glass-card text-center py-6 text-text3" style={{ fontSize: 12 }}>No buy links yet</div>
