@@ -3,21 +3,21 @@ import VelocityBadge from './VelocityBadge';
 
 export default function ProductCard({ product, variant = 'featured' }) {
   const isFeatured = variant === 'featured';
-  const width = isFeatured ? 320 : 220;
-  const imgHeight = isFeatured ? 220 : 160;
+  const maxWidth = isFeatured ? 320 : 220;
+  const imgRatio = isFeatured ? '16/11' : '4/3';
 
   return (
     <article
-      className="card-base card-hover group"
+      className="card-base card-hover group product-card"
       style={{
-        width,
-        minWidth: width,
+        width: '100%',
+        maxWidth,
         cursor: 'pointer',
         transition: 'transform 280ms ease, box-shadow 280ms ease, border-color 280ms ease',
       }}
     >
       {/* ── Image ── */}
-      <div style={{ position: 'relative', height: imgHeight, overflow: 'hidden' }}>
+      <div style={{ position: 'relative', width: '100%', aspectRatio: imgRatio, overflow: 'hidden' }}>
         <img
           src={product.image}
           alt={product.name}
