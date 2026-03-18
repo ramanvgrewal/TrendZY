@@ -94,19 +94,46 @@ export default function OnlyOnTrendzy() {
             </div>
 
             {/* Product grid */}
-            {loading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {Array.from({ length: 6 }).map((_, i) => (
-                        <div key={i} className="rounded-xl anim-shimmer" style={{ height: 420 }} />
-                    ))}
-                </div>
-            ) : filtered.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 anim-fade-up">
-                    {filtered.map(p => (
-                        <CuratedCard key={p.id} product={p} />
-                    ))}
-                </div>
-            ) : (
+                    {loading ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {Array.from({ length: 6 }).map((_, i) => (
+                                <div key={i} className="rounded-xl anim-shimmer" style={{ height: 420 }} />
+                            ))}
+                        </div>
+                    ) : filtered.length > 0 ? (
+                        (() => {
+                            const buckets = { Tees: [], Jeans: [], Serums: [], Other: [] };
+                            const keyFor = (p) => {
+                                const cat = (p.category || p.productCategory || '').toString().toLowerCase();
+                                const name = (p.productName || p.product_name || p.brandName || '').toString().toLowerCase();
+                                if (cat.includes('tee') || name.includes('tee') || name.includes('shirt')) return 'Tees';
+                                if (cat.includes('jean') || name.includes('jean')) return 'Jeans';
+                                if (cat.includes('serum') || name.includes('serum') || cat.includes('skincare')) return 'Serums';
+                                return 'Other';
+                            };
+                            filtered.forEach(p => buckets[keyFor(p)].push(p));
+
+                            const Section = ({ title, items }) => (
+                                items.length === 0 ? null : (
+                                    <section className="mb-12">
+                                        <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 10 }}>{title}</h2>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 anim-fade-up">
+                                            {items.map(item => <CuratedCard key={item.id} product={item} />)}
+                                        </div>
+                                    </section>
+                                )
+                            );
+
+                            return (
+                                <div>
+                                    <Section title="Tees" items={buckets.Tees} />
+                                    <Section title="Jeans" items={buckets.Jeans} />
+                                    <Section title="Serums" items={buckets.Serums} />
+                                    <Section title="Other" items={buckets.Other} />
+                                </div>
+                            );
+                        })()
+                    ) : (
                 <div className="text-center py-20 anim-fade-in">
                     <span className="text-5xl mb-4 block">✦</span>
                     <p style={{ fontFamily: 'Playfair Display, serif', fontSize: 22, fontWeight: 700 }} className="text-text mb-2">

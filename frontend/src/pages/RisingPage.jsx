@@ -59,18 +59,51 @@ export default function RisingPage() {
                 </div>
             </section>
 
-            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-16">
-                {loading
-                    ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
-                    : filtered.map((trend, i) => <TrendCard key={trend.id} trend={trend} index={i} />)
-                }
-                {!loading && filtered.length === 0 && (
-                    <div className="col-span-full text-center py-20 anim-fade-in">
-                        <span className="text-3xl mb-3 block">🌱</span>
-                        <p className="text-text3" style={{ fontSize: 14 }}>No rising trends detected right now</p>
-                    </div>
-                )}
-            </section>
+            {/* Grouped sections: Tees / Jeans / Serums / Other */}
+            {loading ? (
+                <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-16">
+                    {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
+                </section>
+            ) : (
+                (() => {
+                    const buckets = { Tees: [], Jeans: [], Serums: [], Other: [] };
+                    const keyFor = (t) => {
+                        const cat = (t.category || t.productCategory || '').toString().toLowerCase();
+                        const name = (t.productName || '').toString().toLowerCase();
+                        if (cat.includes('tee') || name.includes('tee') || name.includes('shirt')) return 'Tees';
+                        if (cat.includes('jean') || name.includes('jean')) return 'Jeans';
+                        if (cat.includes('serum') || name.includes('serum') || cat.includes('skincare')) return 'Serums';
+                        return 'Other';
+                    };
+                    filtered.forEach(t => buckets[keyFor(t)].push(t));
+
+                    const Section = ({ title, items }) => (
+                        items.length === 0 ? null : (
+                            <section className="mb-12">
+                                <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 10 }}>{title}</h2>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    {items.map((trend) => <TrendCard key={trend.id} trend={trend} />)}
+                                </div>
+                            </section>
+                        )
+                    );
+
+                    return (
+                        <div>
+                            <Section title="Tees" items={buckets.Tees} />
+                            <Section title="Jeans" items={buckets.Jeans} />
+                            <Section title="Serums" items={buckets.Serums} />
+                            <Section title="Other" items={buckets.Other} />
+                            {filtered.length === 0 && (
+                                <div className="col-span-full text-center py-20 anim-fade-in">
+                                    <span className="text-3xl mb-3 block">🌱</span>
+                                    <p className="text-text3" style={{ fontSize: 14 }}>No rising trends detected right now</p>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })()
+            )}
         </div>
     );
 }
