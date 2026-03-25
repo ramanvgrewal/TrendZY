@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { mockTrends, mockCategories } from './mockData';
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080',
@@ -22,9 +21,9 @@ export async function fetchStats() {
         backendOffline = true;
         return {
             totalSignals: '—',
-            activeTrends: mockTrends.length,
-            indiaRelevantCount: mockTrends.filter(t => t.indiaRelevant).length,
-            subredditsMonitored: 24
+            activeTrends: 0,
+            indiaRelevantCount: 0,
+            subredditsMonitored: 0
         };
     }
 }
@@ -38,13 +37,7 @@ export async function fetchTrends(params = {}) {
         return data;
     } catch {
         backendOffline = true;
-        let filtered = [...mockTrends];
-        if (params.category) filtered = filtered.filter(t => t.category?.toLowerCase() === params.category.toLowerCase());
-        if (params.gender) filtered = filtered.filter(t => t.gender === params.gender);
-        if (params.pricePoint) filtered = filtered.filter(t => t.pricePoint === params.pricePoint);
-        if (params.indiaRelevant) filtered = filtered.filter(t => t.indiaRelevant);
-        if (params.audience) filtered = filtered.filter(t => t.audienceTag === params.audience);
-        return filtered;
+        return [];
     }
 }
 
@@ -55,7 +48,7 @@ export async function fetchRisingTrends() {
         return data;
     } catch {
         backendOffline = true;
-        return mockTrends.filter(t => t.velocityLabel === 'Rising Fast');
+        return [];
     }
 }
 
@@ -66,7 +59,7 @@ export async function fetchTrendById(id) {
         return data;
     } catch {
         backendOffline = true;
-        return mockTrends.find(t => t.id === Number(id)) || null;
+        return null;
     }
 }
 
@@ -77,7 +70,7 @@ export async function fetchCategories() {
         return data;
     } catch {
         backendOffline = true;
-        return mockCategories;
+        return [];
     }
 }
 
@@ -99,15 +92,7 @@ export async function fetchSections() {
         return data;
     } catch {
         backendOffline = true;
-        // mock sections
-        return [
-            {
-                subcategory: "Sneakers",
-                emoji: "👟",
-                topVibes: ["streetwear"],
-                trends: mockTrends.slice(0, 4)
-            }
-        ];
+        return [];
     }
 }
 

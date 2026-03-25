@@ -217,6 +217,9 @@ public class TrendService {
         String imageUrl      = product != null && product.getPrimaryImageUrl() != null
                 ? product.getPrimaryImageUrl()
                 : trend.getImageUrl();
+        String shopUrl       = product != null && product.getShopUrl() != null
+                ? product.getShopUrl()
+                : trend.getShopUrl();
         String amazonUrl     = product != null && product.getAmazonUrl() != null
                 ? product.getAmazonUrl()
                 : trend.getAmazonUrl();
@@ -228,10 +231,13 @@ public class TrendService {
                 : trend.getEstimatedPrice();
         Double originalPrice = product != null && product.getOriginalPrice() != null
                 ? product.getOriginalPrice()
-                : null; // don't fake original price
+                : null;
         String platform      = product != null && product.getPlatform() != null
                 ? product.getPlatform()
                 : trend.getPlatform();
+        String enrichmentStatus = trend.getEnrichmentStatus() != null
+                ? trend.getEnrichmentStatus()
+                : "PENDING";
 
         return TrendResponse.builder()
                 .id(trend.getId())
@@ -252,12 +258,14 @@ public class TrendService {
                 .images(product != null ? product.getImages() : null)
                 .imageUrl(imageUrl)
                 .primaryImageUrl(imageUrl)
+                .shopUrl(shopUrl)
                 .amazonUrl(amazonUrl)
                 .myntraUrl(myntraUrl)
-                .flipkartUrl(trend.getFlipkartUrl())  // ← was missing
+                .flipkartUrl(trend.getFlipkartUrl())
                 .price(price)
                 .estimatedPrice(trend.getEstimatedPrice())
                 .originalPrice(originalPrice)
+                .enrichmentStatus(enrichmentStatus)
                 .platform(platform)
                 .firstDetectedAt(trend.getFirstDetectedAt())
                 .detectedAt(trend.getFirstDetectedAt())

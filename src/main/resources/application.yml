@@ -11,9 +11,9 @@ spring:
       database: trendzy
 
   datasource:
-    url: ${POSTGRES_URL:}
+    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/trendpulse}
     username: postgres
-    password: ${POSTGRES_PASS}
+    password: ${POSTGRES_PASS:Virendra@123}
 
   jpa:
     hibernate:
@@ -21,7 +21,7 @@ spring:
 
   ai:
     openai:
-      api-key: ${GROQ_API_KEY}
+      api-key: ${GROQ_API_KEY:}
       base-url: https://api.groq.com/openai
       chat:
         options:

@@ -11,6 +11,7 @@ import VibeFilter from '../components/ui/VibeFilter';
 import SkeletonCard from '../components/ui/SkeletonCard';
 import ErrorState from '../components/ui/ErrorState';
 import EmptyState from '../components/ui/EmptyState';
+import { filterAndSortProducts } from '../utils/productUtils';
 
 export default function SearchPage() {
   const navigate = useNavigate();
@@ -72,6 +73,8 @@ export default function SearchPage() {
     setShowAutocomplete(false);
     setShowFilters(true);
   };
+
+  const finalSearchResults = filterAndSortProducts(searchResults?.content || searchResults || []);
 
   return (
     <div className="min-h-screen flex flex-col bg-bg">
@@ -194,9 +197,9 @@ export default function SearchPage() {
               </div>
             ) : searchError ? (
               <ErrorState message="Failed to fetch search results." onRetry={refetchSearch} />
-            ) : searchResults?.content?.length > 0 || searchResults?.length > 0 ? (
+            ) : finalSearchResults.length > 0 ? (
                <div className="flex flex-wrap gap-6 justify-center sm:justify-start">
-                 {(searchResults.content || searchResults).map(product => (
+                 {finalSearchResults.map(product => (
                    <ProductCard key={product.id} product={product} source="search_results" />
                  ))}
                </div>

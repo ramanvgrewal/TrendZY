@@ -13,9 +13,11 @@ import org.springframework.stereotype.Component;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @Component
 @Slf4j
@@ -39,6 +41,9 @@ public class CuratedProductSeeder {
         int updated = 0;
         int skipped = 0;
 
+        // ── Track every valid key present in the seed file ────────
+        Set<String> seedKeys = new HashSet<>();
+
         for (Map<String, Object> item : seedData) {
             try {
                 CuratedProduct incoming = mapToProduct(item);
@@ -47,13 +52,15 @@ public class CuratedProductSeeder {
                     continue;
                 }
 
+                // Register this product as "still in seed"
+                seedKeys.add(compositeKey(incoming.getProductName(), incoming.getBrandName()));
+
                 Optional<CuratedProduct> existing = curatedProductRepository
                         .findByProductNameAndBrandName(
                                 incoming.getProductName(),
                                 incoming.getBrandName());
 
                 if (existing.isPresent()) {
-                    // ── UPDATE — apply all changed fields ─────────
                     CuratedProduct current = existing.get();
                     boolean changed = applyUpdates(current, incoming);
 
@@ -69,7 +76,6 @@ public class CuratedProductSeeder {
                     }
 
                 } else {
-                    // ── CREATE — new product ───────────────────────
                     curatedProductRepository.save(incoming);
                     created++;
                     log.info("[SEEDER] ✅ Created: '{}' by '{}'",
@@ -83,8 +89,36 @@ public class CuratedProductSeeder {
             }
         }
 
-        log.info("[SEEDER] ✅ Sync complete — created: {}, updated: {}, unchanged: {}",
-                created, updated, skipped);
+        // ── Hard delete products removed from the seed file ───────
+        int deleted = deleteRemovedProducts(seedKeys);
+
+        log.info("[SEEDER] ✅ Sync complete — created: {}, updated: {}, unchanged: {}, deleted: {}",
+                created, updated, skipped, deleted);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // HARD DELETE REMOVED PRODUCTS
+    // ─────────────────────────────────────────────────────────────
+
+    private int deleteRemovedProducts(Set<String> seedKeys) {
+        List<CuratedProduct> allProducts = curatedProductRepository.findAll();
+        int deleted = 0;
+
+        for (CuratedProduct product : allProducts) {
+            String key = compositeKey(product.getProductName(), product.getBrandName());
+            if (!seedKeys.contains(key)) {
+                curatedProductRepository.delete(product);
+                deleted++;
+                log.info("[SEEDER] 🗑️ Deleted (removed from seed): '{}' by '{}'",
+                        product.getProductName(), product.getBrandName());
+            }
+        }
+
+        return deleted;
+    }
+
+    private String compositeKey(String productName, String brandName) {
+        return (productName + "::" + brandName).toLowerCase();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -132,17 +166,12 @@ public class CuratedProductSeeder {
             existing.setFeatured(incoming.isFeatured());
             changed = true;
         }
-        // Always ensure active = true on sync
-        if (!existing.isActive()) {
-            existing.setActive(true);
-            changed = true;
-        }
 
         return changed;
     }
 
     private boolean hasChanged(String existing, String incoming) {
-        if (incoming == null) return false; // null incoming = no change
+        if (incoming == null) return false;
         return !incoming.equals(existing);
     }
 
@@ -200,7 +229,6 @@ public class CuratedProductSeeder {
         Double priceInr    = getDouble(item, "priceInr");
         List<String> vibeTags = getStringList(item, "vibeTags");
 
-        // Fix missing protocol on image URLs
         if (imageUrl != null && imageUrl.startsWith("//")) {
             imageUrl = "https:" + imageUrl;
         }

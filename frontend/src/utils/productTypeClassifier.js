@@ -252,6 +252,14 @@ const TYPE_MAP = [
 
     // ── ACCESSORIES ───────────────────────────────────────────
     {
+        key: 'watches',
+        label: 'Watches & Timepieces',
+        emoji: '⌚',
+        accent: '#94a3b8',
+        dim: 'rgba(148,163,184,0.10)',
+        keywords: ['watch', 'timepiece', 'chronograph', 'smartwatch'],
+    },
+    {
         key: 'bags',
         label: 'Bags & Totes',
         emoji: '👜',

@@ -32,6 +32,9 @@ public interface TrendRepository extends MongoRepository<Trend, String> {
 
     List<Trend> findByImageUrlIsNullAndActiveTrue();
 
+    @Query("{ '$or': [{'enrichmentStatus': 'PENDING'}, {'enrichmentStatus': null}], 'active': true }")
+    List<Trend> findPendingEnrichment();
+
     List<Trend> findTop8ByTierAndActiveTrueOrderByTrendScoreDesc(String tier);
 
     // For findAll with active filter

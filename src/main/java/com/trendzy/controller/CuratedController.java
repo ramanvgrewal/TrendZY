@@ -38,10 +38,9 @@ public class CuratedController {
 
     @GetMapping("/all")
     public ApiResponse<List<CuratedResponse>> getAllCuratedProducts(
-            @RequestParam(required = false) String brand,
-            @RequestParam(required = false, defaultValue = "All") String vibe) {
+            @RequestParam(name = "brand", required = false) String brand,
+            @RequestParam(name = "vibe", required = false, defaultValue = "All") String vibe) {
 
-        // Call a new service method that returns a List
         List<CuratedResponse> products = curatedService.getAllCuratedProducts(brand, vibe);
 
         return ApiResponse.<List<CuratedResponse>>builder()

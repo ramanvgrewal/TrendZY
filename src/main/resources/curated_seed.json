@@ -1,22 +1,5 @@
 [
   {
-    "category": "Streetwear",
-    "productType": "T-Shirt",
-    "brandName": "VEIRDO",
-    "productName": "Oversized Logo Tee",
-    "imageUrl": "https://veirdo.in/cdn/shop/files/67_21.jpg?v=1758284987end",
-    "websiteLink": "https://veirdo.in",
-    "priceInr": 649,
-    "priceRange": "550-750",
-    "description": "Minimalist streetwear tee",
-    "featured": false,
-    "vibeTags": [
-      "Streetwear",
-      "GenZ",
-      "BudgetFit"
-    ]
-  },
-  {
     "category": "Y2K",
     "productType": "Fitted Tank",
     "brandName": "ASOS",
@@ -980,10 +963,6 @@
   },
 
 
-
-
-
-
   {
     "category": "Streetwear",
     "productType": "T-Shirt",
@@ -1257,7 +1236,99 @@
       "description": "White oversized graphic tee with Monster Energy print for bold Gen Z street style",
       "featured": true,
       "vibeTags": ["Sale", "GraphicPrint", "OversizedFit"]
-    }
+    },
 
+    {
+      "category": "Y2K Fashion",
+      "productType": "T-Shirt",
+      "brandName": "VYBEgear",
+      "productName": "Bitchilante Vybe T-shirt!",
+      "imageUrl": "https://vybegear.in/wp-content/uploads/2026/03/Untitled-design-91-1.png",
+      "websiteLink": "https://vybegear.in/product/bitchilante-vybe-t-shirt/",
+      "priceInr": 749,
+      "priceRange": "700-800",
+      "description": "Black acid wash premium cotton oversized tee with bold Bitchilante typography",
+      "featured": true,
+      "vibeTags": ["Y2K", "Oversized", "Streetwear"]
+    },
+    {
+      "category": "Y2K Fashion",
+      "productType": "T-Shirt",
+      "brandName": "VYBEgear",
+      "productName": "You Got This T-shirt!",
+      "imageUrl": "https://vybegear.in/wp-content/uploads/2026/03/Untitled-design-98-3.png",
+      "websiteLink": "https://vybegear.in/product/you-got-this-t-shirt/",
+      "priceInr": 849,
+      "priceRange": "800-900",
+      "description": "Acid wash oversized tee featuring vibrant colorful motivational graphic design",
+      "featured": true,
+      "vibeTags": ["Motivational", "ColorBlocking", "Oversized"]
+    },
+    {
+      "category": "Streetwear",
+      "productType": "T-Shirt",
+      "brandName": "LEOTUDE",
+      "productName": "Men Black Urban Look Oversized T-Shirt",
+      "imageUrl": "https://upload.meeshosupplyassets.com/cataloging/1774009338117/1283239798.jpg",
+      "websiteLink": "https://www.leotude.com/product_details?pro=Men_Black_Urban_Look_Oversized_TShirt_Men_Oversized_TShirt_Black_7bf387dac91fcb37b0c2_S",
+      "priceInr": 399,
+      "priceRange": "300-500",
+      "description": "Minimalist black oversized cotton blend casual tee with premium construction",
+      "featured": true,
+      "vibeTags": ["Minimalist", "Urban", "Oversized"]
+    },
+
+    {
+      "category": "Streetwear",
+      "productType": "Hoodie",
+      "brandName": "CLORYco.",
+      "productName": "Someone's Favourite Mistake Hoodie",
+      "imageUrl": "https://cloryco.com/wp-content/uploads/2025/12/1-copy-2-scaled.webp",
+      "websiteLink": "https://cloryco.com/product/black-hoodie-someones-favourite-mistake/",
+      "priceInr": 3100,
+      "priceRange": "3100-3200",
+      "description": "Bold black hoodie with red metallic back text artistic design streetwear",
+      "featured": true,
+      "vibeTags": ["Edgy", "Oversized", "Bestseller"]
+    },
+    {
+      "category": "Y2K Fashion",
+      "productType": "T-Shirt",
+      "brandName": "CLORYco.",
+      "productName": "Wings of Bloom - Oversized T-shirt",
+      "imageUrl": "https://cloryco.com/wp-content/uploads/2025/06/DSC06703-copy-2-1-scaled.webp",
+      "websiteLink": "https://cloryco.com/product/off-white-oversized-t-shirt-wings-of-bloom/",
+      "priceInr": 2055,
+      "priceRange": "2000-2100",
+      "description": "Off-white oversized tee with colorful teal bird graphic nature inspired",
+      "featured": true,
+      "vibeTags": ["Nature-inspired", "Colorful", "Oversized"]
+    },
+    {
+      "category": "Streetwear",
+      "productType": "T-Shirt",
+      "brandName": "Main Character India",
+      "productName": "Out Of Town Royal Blue Heavyweight-Oversized T-Shirt",
+      "imageUrl": "",
+      "websiteLink": "https://www.maincharacterindia.com/products/out-of-town-blue-oversized-t-shirt",
+      "priceInr": 1299,
+      "priceRange": "1200-1300",
+      "description": "Royal blue heavyweight oversized tee with minimalist white logo graphics",
+      "featured": false,
+      "vibeTags": ["Minimalist", "Heavyweight", "Logo"]
+    },
+    {
+      "category": "Streetwear",
+      "productType": "T-Shirt",
+      "brandName": "Urban Monkey",
+      "productName": "Monkeyverse Oversized T-Shirt",
+      "imageUrl": "https://www.urbanmonkey.com/collections/oversized-hip-hop-t-shirts/products/monkeyverse",
+      "websiteLink": "https://www.urbanmonkey.com/collections/oversized-hip-hop-t-shirts/products/monkeyverse",
+      "priceInr": 1199,
+      "priceRange": "1100-1200",
+      "description": "Black oversized tee with vibrant anime character back graphic streetwear art",
+      "featured": true,
+      "vibeTags": ["Anime-inspired", "Graphic", "Oversized"]
+    }
 ]
 

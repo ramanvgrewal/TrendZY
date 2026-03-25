@@ -16,22 +16,14 @@ export default function ProductCard({
   const { isLoggedIn, openAuthModal } = useAuthStore();
   const [isSaved, setIsSaved] = useState(false);
 
-  /* ── Fallback image ── */
-  const imageLock = Math.abs(
-      (product.productName || 'fashion')
-          .split('')
-          .reduce((acc, c) => acc + c.charCodeAt(0), 0) % 9999
-  );
-  const categoryStr = (product.category || 'fashion')
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, '');
-  const fallbackUrl = `https://loremflickr.com/400/600/${categoryStr}?lock=${imageLock}`;
+  const productImg = product.image || product.imageUrl || product.primaryImageUrl;
+  const validStatus = product.enrichmentStatus === undefined || product.enrichmentStatus === null || product.enrichmentStatus === 'SUCCESS' || product.enrichmentStatus === 'COMPLETED';
 
-  const [imgSrc, setImgSrc] = useState(
-      product.primaryImageUrl || product.imageUrl || null
-  );
+  if (!product || !product.shopUrl || !productImg || !validStatus) {
+    return null;
+  }
 
-  const isCurated = product.platform === 'brand' || !!product.shopUrl;
+  const isCurated = product.platform === 'brand' || product.tier === 'curated';
 
   /* ── Interaction handlers ── */
   const handleCardClick = (e) => {
@@ -43,32 +35,6 @@ export default function ProductCard({
   const handleVibeClick = (e, tag) => {
     e.stopPropagation();
     navigate(`/vibe/${tag.replace('#', '')}`);
-  };
-
-  const buyUrl = isCurated
-      ? product.shopUrl
-      : product.amazonUrl || product.myntraUrl || product.flipkartUrl;
-
-  const buyLabel = isCurated
-      ? 'SHOP'
-      : product.amazonUrl
-          ? 'AMAZON'
-          : product.myntraUrl
-              ? 'MYNTRA'
-              : 'BUY';
-
-  const handleBuy = (e) => {
-    e.stopPropagation();
-    if (!buyUrl) return;
-    const platform = isCurated
-        ? 'brand'
-        : product.amazonUrl
-            ? 'amazon'
-            : product.myntraUrl
-                ? 'myntra'
-                : 'flipkart';
-    window.open(buyUrl, '_blank', 'noopener,noreferrer');
-    trackClick(product.id, platform, source);
   };
 
   const handleSave = async (e) => {
@@ -116,25 +82,21 @@ export default function ProductCard({
             style={{
               position: 'relative',
               width: '100%',
-              aspectRatio: '3/4',      /* portrait – correct for fashion products */
               background: '#141414',
               overflow: 'hidden',
               flexShrink: 0,
             }}
         >
           <img
-              src={imgSrc || fallbackUrl}
+              src={productImg}
               alt={product.productName}
               draggable={false}
-              onError={() => setImgSrc(fallbackUrl)}
+              onError={(e) => { e.target.src = "/fallback.png"; }}
+              className="w-full h-64 object-contain rounded-xl group-hover:scale-105"
               style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                objectPosition: 'top center',   /* show model face/product top */
                 transition: 'transform 480ms ease',
+                padding: '12px',
               }}
-              className="group-hover:scale-105"
           />
 
           {/* Bottom gradient for readability */}
@@ -343,31 +305,28 @@ export default function ProductCard({
                 : 'TBA'}
           </span>
 
-            {buyUrl ? (
-                <button
-                    onClick={handleBuy}
+            {product.shopUrl && (
+                <a
+                    href={product.shopUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => { e.stopPropagation(); trackClick(product.id, product.platform || 'store', source); }}
                     className="font-mono"
                     style={{
+                      display: 'inline-block',
                       fontSize: 10, fontWeight: 700,
                       padding: '5px 11px', borderRadius: 7,
                       background: accent,
                       color: '#000',
                       textTransform: 'uppercase', letterSpacing: '0.05em',
-                      border: 'none', cursor: 'pointer',
+                      textDecoration: 'none',
                       transition: 'filter 0.15s, transform 0.12s',
                     }}
                     onMouseEnter={(e) => { e.target.style.filter = 'brightness(1.12)'; e.target.style.transform = 'scale(1.04)'; }}
                     onMouseLeave={(e) => { e.target.style.filter = ''; e.target.style.transform = ''; }}
                 >
-                  {buyLabel} →
-                </button>
-            ) : (
-                <span
-                    className="font-mono"
-                    style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', textTransform: 'uppercase' }}
-                >
-              Coming soon
-            </span>
+                  SHOP ON {product.platform ? product.platform.toUpperCase() : 'STORE'}
+                </a>
             )}
           </div>
         </div>

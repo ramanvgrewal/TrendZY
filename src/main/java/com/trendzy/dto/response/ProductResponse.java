@@ -16,14 +16,18 @@ public class ProductResponse {
     private String productName;
     private List<String> images;
     private String primaryImageUrl;
+    private String shopUrl;
     private String amazonUrl;
     private String myntraUrl;
     private String flipkartUrl;
+    private String meeshoUrl;
     private Double price;
     private Double originalPrice;
     private Double discount;
+    private double matchScore;
     private List<String> sizes;
     private List<String> colors;
     private String description;
     private String platform;
+    private String enrichmentStatus;
 }
