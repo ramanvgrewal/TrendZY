@@ -9,6 +9,7 @@ import ProductCard from '../components/ui/ProductCard';
 import SkeletonCard from '../components/ui/SkeletonCard';
 import ErrorState from '../components/ui/ErrorState';
 import EmptyState from '../components/ui/EmptyState';
+import { filterAndSortProducts } from '../utils/productUtils';
 
 export default function VibeFilterPage() {
   const { tag } = useParams();
@@ -26,8 +27,11 @@ export default function VibeFilterPage() {
 
   const isLoading = trendsLoading || curatedLoading;
   
-  const trendsList = trendsData?.content || trendsData || [];
-  const curatedList = curatedData?.content || curatedData || [];
+  const rawTrendsList = trendsData?.content || trendsData || [];
+  const rawCuratedList = curatedData?.content || curatedData || [];
+  
+  const trendsList = filterAndSortProducts(rawTrendsList);
+  const curatedList = filterAndSortProducts(rawCuratedList);
   
   const hasTrends = trendsList.length > 0;
   const hasCurated = curatedList.length > 0;

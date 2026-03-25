@@ -18,27 +18,33 @@ import java.util.List;
 public class Product {
     @Id
     private String id;
-    
+
     private String trendId; // reference
     private String productName;
-    
+
     private List<String> images;
     private String primaryImageUrl;
-    
+
+    // ── Single best product URL ──
+    private String shopUrl;
+    private String platform;    // "myntra", "amazon", "flipkart", "meesho"
+    private double matchScore;  // scoring engine result
+
+    // ── Legacy per-platform URLs (deprecated) ──
     private String amazonUrl;
     private String myntraUrl;
     private String flipkartUrl;
-    
+    private String meeshoUrl;
+
     private Double price;
     private Double originalPrice;
     private Double discount;
-    
+
     private List<String> sizes;
     private List<String> colors;
-    
+
     private String description;
-    private String platform;
-    
+
     private LocalDateTime enrichedAt;
-    private String enrichmentStatus;
+    private String enrichmentStatus; // COMPLETED, NO_VALID_PRODUCT
 }

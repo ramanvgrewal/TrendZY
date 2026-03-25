@@ -10,6 +10,7 @@ import ProductCard from '../components/ui/ProductCard';
 import SkeletonCard from '../components/ui/SkeletonCard';
 import ErrorState from '../components/ui/ErrorState';
 import EmptyState from '../components/ui/EmptyState';
+import { filterAndSortProducts } from '../utils/productUtils';
 
 export default function SavedPage() {
   const navigate = useNavigate();
@@ -22,11 +23,13 @@ export default function SavedPage() {
     }
   }, [isLoggedIn, navigate, openAuthModal]);
 
-  const { data: savedItems, isLoading, isError, refetch } = useQuery({
+  const { data: rawSavedItems, isLoading, isError, refetch } = useQuery({
     queryKey: ['saved'],
     queryFn: getSaved,
     enabled: isLoggedIn
   });
+
+  const savedItems = filterAndSortProducts(rawSavedItems);
 
   if (!isLoggedIn) return null; // Wait for redirect
 
@@ -50,7 +53,7 @@ export default function SavedPage() {
           </div>
         ) : isError ? (
           <ErrorState message="Could not load your saved items" onRetry={refetch} />
-        ) : savedItems && savedItems.length > 0 ? (
+        ) : savedItems.length > 0 ? (
           <div className="flex flex-wrap gap-6 justify-center sm:justify-start">
             {savedItems.map(product => (
               <ProductCard key={product.id} product={product} source="saved_feed" />

@@ -35,10 +35,12 @@ public class TrendResponse {
     private List<String> images; 
     private String imageUrl; 
     private String primaryImageUrl;
+    private String shopUrl;
     private String amazonUrl;
     private String myntraUrl;
     private String flipkartUrl;
     private Double price;
+    private String enrichmentStatus;
     private Double estimatedPrice;
     private Double originalPrice; 
     private String platform;

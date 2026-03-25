@@ -1,6 +1,4 @@
-import { getTickerItems } from '../api/mockData';
-
-const items = getTickerItems();
+const items = [];
 
 export default function Ticker() {
   if (items.length === 0) return null;

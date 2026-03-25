@@ -40,7 +40,7 @@ export default function ProductDetailPage() {
 
   useEffect(() => {
     if (product) {
-      setSelectedImage(product.primaryImageUrl || product.imageUrl || null);
+      setSelectedImage(product.image || product.imageUrl || product.primaryImageUrl || null);
     }
   }, [product]);
 
@@ -132,20 +132,13 @@ export default function ProductDetailPage() {
 
   const displayPrice = product.price || product.estimatedPrice || 0;
 
-  const imageLock = Math.abs(
-    (product?.productName || 'fashion')
-      .split('')
-      .reduce((acc, char) => acc + char.charCodeAt(0), 0) % 9999
-  );
-  const categoryStr = (product?.category || 'fashion')
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, '');
-  const detailFallback = `https://loremflickr.com/400/600/${categoryStr}?lock=${imageLock}`;
+  const detailFallback = "/fallback.png";
+  const productImg = product.image || product.imageUrl || product.primaryImageUrl;
 
   const displayImages = product.images?.length > 1
     ? product.images
-    : product.primaryImageUrl
-      ? [product.primaryImageUrl]
+    : productImg
+      ? [productImg]
       : [detailFallback];
 
   return (
@@ -295,56 +288,17 @@ export default function ProductDetailPage() {
 
             {/* 6. Shop buttons */}
             <div className="flex flex-col gap-3 mb-5 w-full">
-              {isCurated && product.shopUrl && (
+              {product.shopUrl ? (
                 <a
                   href={product.shopUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={() => trackClick(product.id, 'brand', 'product_detail')}
-                  className="w-full py-4 bg-[#c4b5fd] hover:bg-[#a78bfa] text-black font-bold text-sm tracking-widest uppercase text-center rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
+                  onClick={() => trackClick(product.id, product.platform || 'store', 'product_detail')}
+                  className="w-full py-4 bg-lime-400 hover:bg-lime-500 text-black font-bold text-sm tracking-widest uppercase text-center rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
                 >
-                  <span>SHOP {product.brandName?.toUpperCase() || 'NOW'} ↗</span>
+                  <span>SHOP ON {product.platform ? product.platform.toUpperCase() : 'STORE'} ↗</span>
                 </a>
-              )}
-
-              {!isCurated && product.amazonUrl && (
-                <a
-                  href={product.amazonUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => trackClick(product.id, 'amazon', 'product_detail')}
-                  className="w-full py-4 bg-[#FF9900] hover:bg-[#e88a00] text-black font-bold text-sm tracking-widest uppercase text-center rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
-                >
-                  <span>BUY ON AMAZON ↗</span>
-                </a>
-              )}
-
-              {!isCurated && product.myntraUrl && (
-                <a
-                  href={product.myntraUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => trackClick(product.id, 'myntra', 'product_detail')}
-                  className="w-full py-4 bg-[#FF3F6C] hover:bg-[#e5365f] text-white font-bold text-sm tracking-widest uppercase text-center rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
-                >
-                  <span>BUY ON MYNTRA ↗</span>
-                </a>
-              )}
-
-              {!isCurated && product.flipkartUrl && (
-                <a
-                  href={product.flipkartUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => trackClick(product.id, 'flipkart', 'product_detail')}
-                  className="w-full py-4 bg-[#2874F0] hover:bg-[#1e5fd4] text-white font-bold text-sm tracking-widest uppercase text-center rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
-                >
-                  <span>BUY ON FLIPKART ↗</span>
-                </a>
-              )}
-
-              {/* If ALL are null — show disabled state */}
-              {!isCurated && !product.amazonUrl && !product.myntraUrl && !product.flipkartUrl && (
+              ) : (
                 <button disabled
                   className="w-full py-4 bg-[#1a1a1a] text-[rgba(255,255,255,0.3)] font-bold text-sm tracking-widest uppercase rounded-xl cursor-not-allowed">
                   LINK UNAVAILABLE

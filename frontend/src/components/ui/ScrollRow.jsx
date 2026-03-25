@@ -3,10 +3,13 @@ import ErrorState from './ErrorState';
 import ProductCard from './ProductCard';
 import { useRef } from 'react';
 
+import { filterAndSortProducts } from '../../utils/productUtils';
+
 export default function ScrollRow({ title, subtitle, badge, badgeColor = 'lime', isLoading, isError, data, featured, onRetry, source = "home_feed" }) {
   const scrollRef = useRef(null);
 
-  const items = data?.content || (Array.isArray(data) ? data : []);
+  const rawItems = data?.content || (Array.isArray(data) ? data : []);
+  const items = filterAndSortProducts(rawItems);
 
   // Add hide logic for empty data (only if not loading and not error)
   if (!isLoading && !isError && items.length === 0) return null;

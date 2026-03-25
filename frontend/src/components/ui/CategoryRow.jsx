@@ -1,6 +1,8 @@
 import { useRef } from 'react';
 import ProductCard from './ProductCard';
 
+import { filterAndSortProducts } from '../../utils/productUtils';
+
 /**
  * CategoryRow
  * Props:
@@ -8,8 +10,10 @@ import ProductCard from './ProductCard';
  *   products — array of product objects
  *   source   — analytics source string
  */
-export default function CategoryRow({ cfg, products = [], source = 'cat_row' }) {
+export default function CategoryRow({ cfg, products: rawProducts = [], source = 'cat_row' }) {
     const ref = useRef(null);
+    const products = filterAndSortProducts(rawProducts);
+    
     if (!products.length) return null;
 
     const { label, emoji, accent, dim } = cfg;

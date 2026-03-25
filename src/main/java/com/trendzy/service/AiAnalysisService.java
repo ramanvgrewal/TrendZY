@@ -3,6 +3,7 @@ package com.trendzy.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trendzy.config.GroqConfig;
+import com.trendzy.model.mongo.ProductFingerprint;
 import com.trendzy.model.mongo.Signal;
 import com.trendzy.model.mongo.Trend;
 import com.trendzy.repository.mongo.SignalRepository;
@@ -96,7 +97,7 @@ public class AiAnalysisService {
     }
 
     // ─────────────────────────────────────────────────────────────
-    // PROMPT BUILDER
+    // PROMPT BUILDER — now includes product fingerprint fields
     // ─────────────────────────────────────────────────────────────
 
     private String buildPrompt(List<Signal> signals) {
@@ -121,6 +122,15 @@ public class AiAnalysisService {
         sb.append("- whyTrending (array of strings): 2-3 short specific reasons\n");
         sb.append("- indiaRelevanceNote (string): 1 sentence on India-specific relevance\n");
         sb.append("- estimatedPrice (number): price in INR, 0 if unknown\n\n");
+
+        // ── Product fingerprint fields (NEW) ──
+        sb.append("ADDITIONALLY, for each product include these PRODUCT IDENTITY fields for accurate e-commerce matching:\n");
+        sb.append("- brand (string): the brand name if identifiable, empty string if generic/unknown\n");
+        sb.append("- productType (string): specific product type for search e.g. 'sneakers', 'hoodie', 'tote bag', 'lip tint', 'sunscreen'\n");
+        sb.append("- color (string): primary color if mentioned, empty string if unknown\n");
+        sb.append("- gender (string): 'men', 'women', or 'unisex'\n");
+        sb.append("- searchKeywords (array of strings): 3-5 specific search keywords to find this exact product on e-commerce sites e.g. ['retro', 'chunky', 'platform', 'white']\n\n");
+
         sb.append("Signals to analyze:\n");
         sb.append("─────────────────────────────────────\n");
 
@@ -200,11 +210,13 @@ public class AiAnalysisService {
                 Trend trend = buildTrend(node, productName, signals, detectedSubreddits);
                 trendRepository.save(trend);
                 savedCount++;
-                log.info("[AI] ✅ Saved new trend: '{}' | tier: {} | score: {} | price: ₹{}",
+                log.info("[AI] ✅ Saved new trend: '{}' | tier: {} | score: {} | price: ₹{} | brand: '{}' | type: '{}'",
                         trend.getProductName(),
                         trend.getTier(),
                         trend.getTrendScore(),
-                        trend.getEstimatedPrice());
+                        trend.getEstimatedPrice(),
+                        trend.getFingerprint() != null ? trend.getFingerprint().getBrand() : "",
+                        trend.getFingerprint() != null ? trend.getFingerprint().getProductType() : "");
             } catch (Exception e) {
                 log.error("[AI] Failed to save trend '{}': {}", productName, e.getMessage());
                 skippedCount++;
@@ -223,7 +235,7 @@ public class AiAnalysisService {
     }
 
     // ─────────────────────────────────────────────────────────────
-    // TREND BUILDER
+    // TREND BUILDER — now includes ProductFingerprint
     // ─────────────────────────────────────────────────────────────
 
     private Trend buildTrend(JsonNode node,
@@ -251,8 +263,20 @@ public class AiAnalysisService {
             if (!reasonText.isEmpty()) whyTrending.add(reasonText);
         });
 
-        // imageUrl, amazonUrl, myntraUrl, flipkartUrl are set only by ProductEnrichmentService
-        // after extracting real product images from ecommerce product pages (no stock/placeholder images)
+        // ── Build ProductFingerprint from AI output ──
+        List<String> searchKeywords = new ArrayList<>();
+        node.path("searchKeywords").forEach(kw -> {
+            String kwText = kw.asText().trim();
+            if (!kwText.isEmpty()) searchKeywords.add(kwText);
+        });
+
+        ProductFingerprint fingerprint = ProductFingerprint.builder()
+                .brand(node.path("brand").asText(""))
+                .productType(node.path("productType").asText(""))
+                .color(node.path("color").asText(""))
+                .gender(node.path("gender").asText("unisex"))
+                .keywords(searchKeywords)
+                .build();
 
         return Trend.builder()
                 .productName(productName)
@@ -270,9 +294,11 @@ public class AiAnalysisService {
                 .detectedSubreddits(detectedSubreddits)
                 .youtubeVideoCount(0)
                 .estimatedPrice(node.path("estimatedPrice").asDouble(0.0))
-                // ✅ No imageUrl, no amazonUrl, no myntraUrl, no flipkartUrl
-                // These are set by ProductEnrichmentService only
+                .fingerprint(fingerprint)
+                .enrichmentStatus("PENDING")
+                // Enrichment fields set by ProductResolverService later
                 .platform(null)
+                .shopUrl(null)
                 .imageUrl(null)
                 .amazonUrl(null)
                 .myntraUrl(null)

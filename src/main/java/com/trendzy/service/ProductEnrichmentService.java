@@ -1,6 +1,6 @@
 package com.trendzy.service;
 
-import com.trendzy.dto.response.ProductImageResult;
+import com.trendzy.dto.response.ProductCandidate;
 import com.trendzy.model.mongo.Product;
 import com.trendzy.model.mongo.Trend;
 import com.trendzy.repository.mongo.ProductRepository;
@@ -10,9 +10,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Orchestrates batch product enrichment for trends.
+ * Delegates actual resolution to ProductResolverService.
+ * Only handles the batch loop, DB persistence, and status tracking.
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -20,10 +24,10 @@ public class ProductEnrichmentService {
 
     private final TrendRepository trendRepository;
     private final ProductRepository productRepository;
-    private final ProductImageExtractorService imageExtractorService;
+    private final ProductResolverService productResolverService;
 
     public int enrichProductsBatch() {
-        List<Trend> unenriched = trendRepository.findByImageUrlIsNullAndActiveTrue();
+        List<Trend> unenriched = trendRepository.findPendingEnrichment();
 
         if (unenriched.isEmpty()) {
             log.info("[ENRICH] No unenriched trends found");
@@ -35,11 +39,14 @@ public class ProductEnrichmentService {
 
         for (Trend trend : unenriched) {
             try {
+                // Skip if already has a product
                 if (productRepository.findByTrendId(trend.getId()).isPresent()) {
                     continue;
                 }
+
                 enrichTrend(trend);
                 enrichedCount++;
+
             } catch (Exception e) {
                 log.error("[ENRICH] Failed for '{}': {}", trend.getProductName(), e.getMessage());
             }
@@ -50,92 +57,77 @@ public class ProductEnrichmentService {
     }
 
     /**
-     * Enrich a single trend: build ecommerce search URLs → get first product link per site →
-     * load product page → extract og:image. Store only real product image URLs and product page URLs.
-     * No placeholders, search-page images, or stock APIs.
+     * Enrich a single trend using the ProductResolverService pipeline.
      */
     private void enrichTrend(Trend trend) {
+        log.info("[ENRICH] ─────────────────────────────────────");
         log.info("[ENRICH] Enriching '{}'", trend.getProductName());
 
-        String rawQuery = (trend.getProductName() + " " + (trend.getCategory() != null ? trend.getCategory() : ""))
-                .replaceAll("[^a-zA-Z0-9 ]", "")
-                .trim();
-        String urlQuery = rawQuery.replace(" ", "+");
+        // ── Resolve best product via scoring pipeline ──
+        ProductCandidate winner = productResolverService.resolve(trend);
 
-        String amazonSearchUrl = "https://www.amazon.in/s?k=" + urlQuery;
-        String myntraSearchUrl = "https://www.myntra.com/search?rawQuery=" + urlQuery;
-        String flipkartSearchUrl = "https://www.flipkart.com/search?q=" + urlQuery;
-
-        String imageUrl = null;
-        String amazonProductUrl = null;
-        String myntraProductUrl = null;
-        String flipkartProductUrl = null;
-
-        ProductImageResult result = imageExtractorService.extractProductImageFromSearchUrl(amazonSearchUrl);
-        if (result != null && result.getImageUrl() != null) {
-            imageUrl = result.getImageUrl();
-            amazonProductUrl = result.getProductPageUrl();
-            log.debug("[ENRICH] Got image from Amazon product page for '{}'", trend.getProductName());
-        }
-        if (imageUrl == null) {
-            result = imageExtractorService.extractProductImageFromSearchUrl(myntraSearchUrl);
-            if (result != null && result.getImageUrl() != null) {
-                imageUrl = result.getImageUrl();
-                myntraProductUrl = result.getProductPageUrl();
-                log.debug("[ENRICH] Got image from Myntra product page for '{}'", trend.getProductName());
-            }
-        }
-        if (imageUrl == null) {
-            result = imageExtractorService.extractProductImageFromSearchUrl(flipkartSearchUrl);
-            if (result != null && result.getImageUrl() != null) {
-                imageUrl = result.getImageUrl();
-                flipkartProductUrl = result.getProductPageUrl();
-                log.debug("[ENRICH] Got image from Flipkart product page for '{}'", trend.getProductName());
-            }
+        if (winner == null) {
+            // No valid product found — mark trend accordingly
+            trend.setEnrichmentStatus("NO_VALID_PRODUCT");
+            trend.setLastUpdatedAt(LocalDateTime.now());
+            trendRepository.save(trend);
+            log.warn("[ENRICH] No valid product for '{}' — marked as NO_VALID_PRODUCT",
+                    trend.getProductName());
+            return;
         }
 
-        if (imageUrl == null) {
-            log.warn("[ENRICH] No product image found for '{}' — saving without image (no placeholder)", trend.getProductName());
+        // ── Determine platform-specific URLs from the winner ──
+        String winnerUrl = winner.getUrl();
+        String platform = winner.getPlatform() != null
+                ? winner.getPlatform().name().toLowerCase() : "unknown";
+
+        String amazonUrl = null, myntraUrl = null, flipkartUrl = null, meeshoUrl = null;
+        switch (platform) {
+            case "amazon"   -> amazonUrl = winnerUrl;
+            case "myntra"   -> myntraUrl = winnerUrl;
+            case "flipkart" -> flipkartUrl = winnerUrl;
+            case "meesho"   -> meeshoUrl = winnerUrl;
         }
 
-        String finalAmazonUrl = amazonProductUrl != null ? amazonProductUrl : amazonSearchUrl;
-        String finalMyntraUrl = myntraProductUrl != null ? myntraProductUrl : myntraSearchUrl;
-        String finalFlipkartUrl = flipkartProductUrl != null ? flipkartProductUrl : flipkartSearchUrl;
-
-        List<String> imageList = new ArrayList<>();
-        if (imageUrl != null) {
-            imageList.add(imageUrl);
-        }
-
+        // ── Build and save Product document ──
         Product product = Product.builder()
                 .trendId(trend.getId())
                 .productName(trend.getProductName())
-                .primaryImageUrl(imageUrl)
-                .images(imageList)
-                .amazonUrl(finalAmazonUrl)
-                .myntraUrl(finalMyntraUrl)
-                .flipkartUrl(finalFlipkartUrl)
-                .price(trend.getEstimatedPrice() > 0 ? trend.getEstimatedPrice() : null)
+                .primaryImageUrl(winner.getImageUrl())
+                .images(winner.getImageUrl() != null ? List.of(winner.getImageUrl()) : List.of())
+                .shopUrl(winnerUrl)
+                .platform(platform)
+                .matchScore(winner.getScore())
+                .amazonUrl(amazonUrl)
+                .myntraUrl(myntraUrl)
+                .flipkartUrl(flipkartUrl)
+                .meeshoUrl(meeshoUrl)
+                .price(winner.getPrice())
                 .originalPrice(null)
                 .discount(null)
                 .sizes(List.of())
                 .colors(List.of())
                 .description(trend.getAiSummary())
-                .platform(amazonProductUrl != null ? "amazon" : (myntraProductUrl != null ? "myntra" : "flipkart"))
                 .enrichedAt(LocalDateTime.now())
                 .enrichmentStatus("COMPLETED")
                 .build();
 
         productRepository.save(product);
 
-        trend.setImageUrl(imageUrl);
-        trend.setAmazonUrl(finalAmazonUrl);
-        trend.setMyntraUrl(finalMyntraUrl);
-        trend.setFlipkartUrl(finalFlipkartUrl);
-        trend.setPlatform(product.getPlatform());
+        // ── Update trend with enrichment results ──
+        trend.setImageUrl(winner.getImageUrl());
+        trend.setShopUrl(winnerUrl);
+        trend.setPlatform(platform);
+        trend.setEnrichmentStatus("COMPLETED");
+        // Legacy fields — populated for backward compat
+        if (amazonUrl != null) trend.setAmazonUrl(amazonUrl);
+        if (myntraUrl != null) trend.setMyntraUrl(myntraUrl);
+        if (flipkartUrl != null) trend.setFlipkartUrl(flipkartUrl);
         trend.setLastUpdatedAt(LocalDateTime.now());
         trendRepository.save(trend);
 
-        log.info("[ENRICH] Trend updated '{}' | image: {}", trend.getProductName(), imageUrl != null ? "set" : "none");
+        log.info("[ENRICH] ✅ '{}' enriched | platform: {} | score: {} | image: {}",
+                trend.getProductName(), platform, winner.getScore(),
+                winner.getImageUrl() != null ? "set" : "none");
     }
 }

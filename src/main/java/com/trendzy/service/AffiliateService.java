@@ -126,6 +126,12 @@ public class AffiliateService {
         Optional<Trend> trend = trendRepository.findById(productId);
         if (trend.isPresent()) {
             Trend t = trend.get();
+            // Prefer shopUrl (new model) — single best product URL
+            if (t.getShopUrl() != null && !t.getShopUrl().isBlank()) {
+                log.debug("[AFFILIATE] Using shopUrl for product {}: {}", productId, t.getShopUrl());
+                return t.getShopUrl();
+            }
+            // Legacy fallback: per-platform URLs
             String url = switch (platform.toLowerCase()) {
                 case "myntra"   -> t.getMyntraUrl();
                 case "flipkart" -> t.getFlipkartUrl();

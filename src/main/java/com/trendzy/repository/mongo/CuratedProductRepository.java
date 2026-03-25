@@ -31,6 +31,9 @@ public interface CuratedProductRepository extends MongoRepository<CuratedProduct
     // Change findFirst... to findAll...
     List<CuratedProduct> findAllByFeaturedTrueAndActiveTrue();
 
+    // In CuratedProductRepository.java
+    List<CuratedProduct> findAllByActiveTrue();
+
     boolean existsByProductNameAndBrandName(String productName, String brandName);
 
     // ── Autocomplete ───────────────────────────────────────────
