@@ -1329,6 +1329,264 @@
       "description": "Black oversized tee with vibrant anime character back graphic streetwear art",
       "featured": true,
       "vibeTags": ["Anime-inspired", "Graphic", "Oversized"]
-    }
+    },
+
+
+
+      {
+        "category": "Streetwear",
+        "productType": "T-Shirt",
+        "brandName": "Antherr",
+        "productName": "BTS Arirang Unisex Oversized T-Shirt | Antherr Core",
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0019/5618/4118/files/222.png",
+        "websiteLink": "https://antherr.com/products/bts-arirang-unisex-oversized-t-shirt-india",
+        "priceInr": 1099,
+        "priceRange": "1000-1100",
+        "description": "Edgy t-shirt featuring Gen Z aesthetic crafted for effortless cool.",
+        "featured": false,
+        "vibeTags": [
+          "OversizedFit",
+          "GenZ",
+          "Streetwear"
+        ]
+      },
+      {
+        "category": "Streetwear",
+        "productType": "T-Shirt",
+        "brandName": "Antherr",
+        "productName": "BTS World Tour Arirang Unisex Oversized T-Shirt | Antherr Core",
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0019/5618/4118/files/224_ce5878ff-b2ba-44b6-b7be-f598c6c74d37.png",
+        "websiteLink": "https://antherr.com/products/bts-world-tour-arirang-oversized-tshirt-india",
+        "priceInr": 1099,
+        "priceRange": "1000-1100",
+        "description": "Relaxed t-shirt featuring street energy essential for layering.",
+        "featured": false,
+        "vibeTags": [
+          "OversizedFit",
+          "GenZ",
+          "Streetwear"
+        ]
+      },
+      {
+        "category": "Streetwear",
+        "productType": "T-Shirt",
+        "brandName": "Antherr",
+        "productName": "BTS Members Unisex Oversized T-Shirt | Antherr Core",
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0019/5618/4118/files/Arirang_BTS_oversized_tshirt_India.png",
+        "websiteLink": "https://antherr.com/products/bts-members-unisex-oversized-t-shirt-antherr-core",
+        "priceInr": 1099,
+        "priceRange": "1000-1100",
+        "description": "Urban t-shirt featuring indie spirit essential for layering.",
+        "featured": false,
+        "vibeTags": [
+          "OversizedFit",
+          "GenZ",
+          "Streetwear"
+        ]
+      },
+      {
+        "category": "Streetwear",
+        "productType": "T-Shirt",
+        "brandName": "Antherr",
+        "productName": "Arirang BTS Unisex Oversized T-Shirt | Antherr Core",
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0019/5618/4118/files/Arirang_BTS_Acid_Wash_oversized_tshirt_India.png",
+        "websiteLink": "https://antherr.com/products/arirang-bts-unisex-oversized-t-shirt-antherr-core",
+        "priceInr": 1099,
+        "priceRange": "1000-1100",
+        "description": "Relaxed t-shirt featuring city life for your next social drop.",
+        "featured": false,
+        "vibeTags": [
+          "OversizedFit",
+          "GenZ",
+          "Streetwear"
+        ]
+      },
+      {
+        "category": "Streetwear",
+        "productType": "T-Shirt",
+        "brandName": "Antherr",
+        "productName": "Basic Coral Unisex Oversized T-Shirt | Antherr Originals",
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0019/5618/4118/files/320.png",
+        "websiteLink": "https://antherr.com/products/basic-coral-unisex-oversized-t-shirt-antherr-originals",
+        "priceInr": 999,
+        "priceRange": "900-1000",
+        "description": "Urban t-shirt featuring street energy essential for layering.",
+        "featured": false,
+        "vibeTags": [
+          "OversizedFit",
+          "GenZ",
+          "Streetwear"
+        ]
+      },
+      {
+        "category": "Streetwear",
+        "productType": "Shirt",
+        "brandName": "Antherr",
+        "productName": "Basic Navy Blue Unisex Oversized Shirt | Antherr Originals",
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0019/5618/4118/files/Navy_Blue_Unisex_Oversized_Shirt_240_GSM_Cotton_Streetwear_ANTHERR_Originals.png",
+        "websiteLink": "https://antherr.com/products/basic-navy-blue-unisex-oversized-shirt-antherr-originals",
+        "priceInr": 999,
+        "priceRange": "900-1000",
+        "description": "Oversized shirt featuring urban vibes for your next social drop.",
+        "featured": false,
+        "vibeTags": [
+          "OversizedFit",
+          "GenZ",
+          "Streetwear"
+        ]
+      },
+      {
+        "category": "Streetwear",
+        "productType": "Shirt",
+        "brandName": "Antherr",
+        "productName": "Basic Maroon Unisex Oversized Shirt | Antherr Originals",
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0019/5618/4118/files/Maroon_Unisex_Oversized_Shirt_240_GSM_Cotton_Streetwear_ANTHERR_Originals.png",
+        "websiteLink": "https://antherr.com/products/basic-maroon-unisex-oversized-shirt-antherr-originals",
+        "priceInr": 999,
+        "priceRange": "900-1000",
+        "description": "Sleek shirt featuring indie spirit perfect for all-day wear.",
+        "featured": false,
+        "vibeTags": [
+          "OversizedFit",
+          "GenZ",
+          "Streetwear"
+        ]
+      },
+      {
+        "category": "Streetwear",
+        "productType": "Shirt",
+        "brandName": "Antherr",
+        "productName": "Basic White Unisex Oversized Shirt | Antherr Originals",
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0019/5618/4118/files/White_Unisex_Oversized_Shirt_240_GSM_Cotton_Streetwear_ANTHERR_Originals.png",
+        "websiteLink": "https://antherr.com/products/basic-white-unisex-oversized-shirt-antherr-originals",
+        "priceInr": 999,
+        "priceRange": "900-1000",
+        "description": "Minimalist shirt featuring street energy for your next social drop.",
+        "featured": false,
+        "vibeTags": [
+          "OversizedFit",
+          "GenZ",
+          "Streetwear"
+        ]
+      },
+      {
+        "category": "Streetwear",
+        "productType": "Shirt",
+        "brandName": "Antherr",
+        "productName": "Basic Black Unisex Oversized Shirt | Antherr Originals",
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0019/5618/4118/files/Black_Unisex_Oversized_Shirt_240_GSM_Cotton_Streetwear_ANTHERR_Originals.png",
+        "websiteLink": "https://antherr.com/products/basic-black-unisex-oversized-shirt-antherr-originals",
+        "priceInr": 999,
+        "priceRange": "900-1000",
+        "description": "Minimalist shirt featuring Gen Z aesthetic perfect for all-day wear.",
+        "featured": false,
+        "vibeTags": [
+          "OversizedFit",
+          "GenZ",
+          "Streetwear"
+        ]
+      },
+      {
+        "category": "Streetwear",
+        "productType": "Joggers",
+        "brandName": "Antherr",
+        "productName": "Black Unisex Everyday Joggers",
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0019/5618/4118/files/Black_Unisex_Everyday_Joggers_clothing_features.png",
+        "websiteLink": "https://antherr.com/products/black-unisex-everyday-joggers-copy",
+        "priceInr": 1299,
+        "priceRange": "1200-1300",
+        "description": "Oversized joggers featuring Gen Z aesthetic perfect for all-day wear.",
+        "featured": false,
+        "vibeTags": [
+          "GenZ",
+          "Streetwear",
+          "IndieIndia"
+        ]
+      },
+      {
+        "category": "Streetwear",
+        "productType": "Joggers",
+        "brandName": "Antherr",
+        "productName": "Grey Melange Unisex Everyday Joggers",
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0019/5618/4118/files/Grey_Melange_Unisex_Everyday_Joggers_clothing_features.png",
+        "websiteLink": "https://antherr.com/products/grey-melange-unisex-everyday-joggers",
+        "priceInr": 1299,
+        "priceRange": "1200-1300",
+        "description": "Boxy fit joggers featuring clean look elevating your street rotation.",
+        "featured": false,
+        "vibeTags": [
+          "GenZ",
+          "Streetwear",
+          "IndieIndia"
+        ]
+      },
+      {
+        "category": "Streetwear",
+        "productType": "Joggers",
+        "brandName": "Antherr",
+        "productName": "Bottle Green Unisex Everyday Joggers",
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0019/5618/4118/files/Bottle_Green_Unisex_Everyday_Joggers_clothing_features.png",
+        "websiteLink": "https://antherr.com/products/bottle-green-unisex-everyday-joggers",
+        "priceInr": 1299,
+        "priceRange": "1200-1300",
+        "description": "Urban joggers featuring street energy built for the daily grind.",
+        "featured": false,
+        "vibeTags": [
+          "GenZ",
+          "Streetwear",
+          "IndieIndia"
+        ]
+      },
+      {
+        "category": "Streetwear",
+        "productType": "Joggers",
+        "brandName": "Antherr",
+        "productName": "Lavender Unisex Everyday Joggers",
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0019/5618/4118/files/Lavender_Unisex_Everyday_Joggers_clothing_features.png",
+        "websiteLink": "https://antherr.com/products/lavender-unisex-everyday-joggers",
+        "priceInr": 1299,
+        "priceRange": "1200-1300",
+        "description": "Bold joggers featuring clean look perfect for all-day wear.",
+        "featured": false,
+        "vibeTags": [
+          "GenZ",
+          "Streetwear",
+          "IndieIndia"
+        ]
+      },
+      {
+        "category": "Streetwear",
+        "productType": "Joggers",
+        "brandName": "Antherr",
+        "productName": "Baby Pink Unisex Everyday Joggers",
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0019/5618/4118/files/Baby_Pink_Unisex_Everyday_Joggers_clothing_features.png",
+        "websiteLink": "https://antherr.com/products/baby-pink-unisex-everyday-joggers",
+        "priceInr": 1299,
+        "priceRange": "1200-1300",
+        "description": "Edgy joggers featuring city life elevating your street rotation.",
+        "featured": false,
+        "vibeTags": [
+          "GenZ",
+          "Streetwear",
+          "IndieIndia"
+        ]
+      },
+      {
+        "category": "Streetwear",
+        "productType": "Joggers",
+        "brandName": "Antherr",
+        "productName": "Maroon Unisex Everyday Joggers",
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0019/5618/4118/files/Maroon_Unisex_Everyday_Joggers_clothing_features.png",
+        "websiteLink": "https://antherr.com/products/maroon-unisex-everyday-joggers",
+        "priceInr": 1299,
+        "priceRange": "1200-1300",
+        "description": "Edgy joggers featuring urban vibes perfect for all-day wear.",
+        "featured": false,
+        "vibeTags": [
+          "GenZ",
+          "Streetwear",
+          "IndieIndia"
+        ]
+  }
 ]
 
