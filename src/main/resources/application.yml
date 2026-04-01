@@ -49,3 +49,11 @@ groq:
   batch-size: 5
   rate-limit-pause-ms: 15000
   daily-token-limit: 95000
+
+scraper:
+  instagram:
+    # Directory where instagram_session.json is stored.
+    # Default: ~/.trendzy/instagram_session.json
+    # Override in production to a writable volume path, e.g.:
+    #   session-dir: /var/trendzy/sessions
+    session-dir: ${user.home}/.trendzy
