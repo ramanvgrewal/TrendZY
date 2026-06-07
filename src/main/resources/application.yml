@@ -3,21 +3,26 @@ server:
 
 spring:
   application:
-    name: trendzy
+    name: trendzy-ingestion-service
 
   data:
     mongodb:
       uri: ${MONGODB_URI:mongodb://localhost:27017}
       database: trendzy
 
-  datasource:
-    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/trendpulse}
-    username: postgres
-    password: ${POSTGRES_PASS:Virendra@123}
-
-  jpa:
-    hibernate:
-      ddl-auto: update
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      retries: 3
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+        delivery.timeout.ms: 120000
+        linger.ms: 1
+        batch.size: 16384
 
   ai:
     openai:
@@ -28,76 +33,8 @@ spring:
           model: llama-3.3-70b-versatile
           stream: false
 
-# ─────────────────────────────────────────────────────────────
-# REDDIT
-# Subreddit selection rationale:
-#
-#   TIER 1 — India-specific, highest signal density
-#     IndianFashion, IndianBeautyDeals, IndianSkincareRoutine,
-#     IndianFashionAddicts, IndiaShoppee
-#     These contain the most direct "where to buy in India" signals.
-#
-#   TIER 2 — Global but heavily followed by Indian Gen Z
-#     streetwear, SkincareAddiction, MakeupAddiction, AsianBeauty,
-#     femalefashionadvice, malefashionadvice, frugalmalefashion, Sneakers
-#     AsianBeauty is especially valuable — K-beauty trends reach India
-#     about 6-8 weeks after blowing up here, giving us early signal.
-#
-#   TIER 3 — Aesthetic / niche
-#     GenZFashion, Y2Kfashion, cottagecore, OUTFITS, NailArt,
-#     Hair, fragrance, handbags, beauty, 30PlusSkinCare
-#
-#   TIER 4 — Tech wearables (growing category for Trendzy)
-#     Earbuds, watches, HeadphoneAdvice
-# ─────────────────────────────────────────────────────────────
-reddit:
-  user-agent: "TrendZY/1.0 (by /u/Few_Ganache_1005)"
-  subreddits: >
-    IndianFashion,
-    IndianBeautyDeals,
-    IndianSkincareRoutine,
-    IndianFashionAddicts,
-    IndiaShoppee,
-    streetwear,
-    SkincareAddiction,
-    MakeupAddiction,
-    AsianBeauty,
-    femalefashionadvice,
-    malefashionadvice,
-    frugalmalefashion,
-    Sneakers,
-    GenZFashion,
-    Y2Kfashion,
-    cottagecore,
-    OUTFITS,
-    NailArt,
-    Hair,
-    fragrance,
-    handbags,
-    beauty,
-    30PlusSkinCare,
-    Earbuds,
-    watches,
-    HeadphoneAdvice
-
-youtube:
-  api-key: ${YOUTUBE_API_KEY:}
-
-jwt:
-  secret: ${JWT_SECRET:8y/B?E(G+KbPeShVmYq3t6w9z$C&F)H@McQfTjWnZr4u7x!A%D*G-KaPdSgUkXp2}
-  expiration: 604800000
-
-scheduler:
-  collection:
-    cron: "0 0 2 * * *"   # 2 AM daily — collect overnight activity
-  analysis:
-    cron: "0 0 4 * * *"   # 4 AM daily — analyze after collection completes
-
-groq:
-  batch-size: 5
-  rate-limit-pause-ms: 15000
-  daily-token-limit: 95000
-
 scraper:
   instagram:
+    session-dir: ${user.home}/.trendzy
+  pinterest:
     session-dir: ${user.home}/.trendzy
