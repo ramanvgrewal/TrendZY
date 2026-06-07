@@ -54,11 +54,9 @@ public class PipelineOrchestratorService {
     public Map<String, Object> triggerAnalysis() {
         log.info("[PIPELINE] Starting AI analysis...");
 
-        // Prefer signals with buy intent or product keywords (priorityScore)
+        // Fetch ALL unprocessed signals — no page limit
         List<Signal> unprocessed = signalRepository
-                .findByProcessedFalseOrderByPriorityScoreDescCollectedAtDesc(
-                        PageRequest.of(0, 100)
-                );
+                .findByProcessedFalseOrderByPriorityScoreDescCollectedAtDesc(PageRequest.of(0, 30));
 
         if (unprocessed.isEmpty()) {
             log.info("[PIPELINE] No unprocessed signals found — skipping analysis");
@@ -72,10 +70,9 @@ public class PipelineOrchestratorService {
         log.info("[PIPELINE] Found {} unprocessed signals — starting batched analysis",
                 unprocessed.size());
 
-        // Use batch size from config (default 5)
         int batchSize       = groqConfig.getBatchSize() > 0 ? groqConfig.getBatchSize() : 5;
         long rateLimitPause = groqConfig.getRateLimitPauseMs() > 0
-                ? groqConfig.getRateLimitPauseMs() : 15000;
+                ? groqConfig.getRateLimitPauseMs() : 15_000;
 
         int batchesProcessed = 0;
         int batchesFailed    = 0;
@@ -130,22 +127,53 @@ public class PipelineOrchestratorService {
     public Map<String, Integer> triggerEnrichment() {
         log.info("[PIPELINE] Starting product enrichment...");
 
-        int enriched = 0;
-        int failed   = 0;
+        int totalEnriched = 0;
+        int totalFailed   = 0;
+        int round         = 0;
 
-        try {
-            enriched = productEnrichmentService.enrichProductsBatch();
-        } catch (Exception e) {
-            failed++;
-            log.error("[PIPELINE] Enrichment failed: {}", e.getMessage());
+        // Loop until there is nothing left to enrich.
+        // Guards against findPendingEnrichment() having an internal fetch limit —
+        // each round picks up the next batch until the repo returns 0.
+        while (true) {
+            round++;
+            log.info("[PIPELINE] Enrichment round {}...", round);
+
+            int enriched = 0;
+            try {
+                enriched = productEnrichmentService.enrichProductsBatch();
+            } catch (Exception e) {
+                totalFailed++;
+                log.error("[PIPELINE] Enrichment round {} failed: {}", round, e.getMessage());
+                break; // don't spin forever on a hard error
+            }
+
+            totalEnriched += enriched;
+
+            if (enriched == 0) {
+                // Nothing left to enrich — all done
+                log.info("[PIPELINE] Enrichment complete — no more pending trends");
+                break;
+            }
+
+            log.info("[PIPELINE] Round {} enriched {} products — checking for more...",
+                    round, enriched);
+
+            // Small pause between rounds to avoid hammering the DB and platforms
+            try {
+                Thread.sleep(2_000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                log.warn("[PIPELINE] Enrichment interrupted after round {}", round);
+                break;
+            }
         }
 
-        log.info("[PIPELINE] Enrichment complete — enriched: {}, failed: {}",
-                enriched, failed);
+        log.info("[PIPELINE] Enrichment finished — total enriched: {}, failed rounds: {}",
+                totalEnriched, totalFailed);
 
         return Map.of(
-                "productsEnriched", enriched,
-                "failed",           failed
+                "productsEnriched", totalEnriched,
+                "failedRounds",     totalFailed
         );
     }
 }

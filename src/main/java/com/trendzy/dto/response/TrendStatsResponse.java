@@ -15,6 +15,7 @@ public class TrendStatsResponse {
     private long signalsToday;
     private long trendingCount;
     private long risingCount;
+    private long indiaRelevantCount;
     private int subredditsMonitored;
     private LocalDateTime lastCollectionTime;
     

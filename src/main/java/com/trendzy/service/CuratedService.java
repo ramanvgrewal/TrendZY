@@ -35,6 +35,10 @@ public class CuratedService {
         boolean hasVibe  = vibeTag != null && !vibeTag.isBlank()
                 && !vibeTag.equalsIgnoreCase("All");
 
+        if (hasVibe) {
+            vibeTag = vibeTag.toLowerCase();
+        }
+
         log.info("[CURATED] Fetching products — brand: '{}', vibe: '{}', page: {}",
                 hasBrand ? brand : "ALL",
                 hasVibe  ? vibeTag : "ALL",

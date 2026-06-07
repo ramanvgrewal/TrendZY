@@ -12,6 +12,6 @@ import java.util.List;
 public interface SignalRepository extends MongoRepository<Signal, String> {
     boolean existsBySourceId(String sourceId);
     long countByCollectedAtAfter(LocalDateTime dateTime);
-    // Prefer signals with buy intent or product keywords (higher priorityScore) for analysis
+
     List<Signal> findByProcessedFalseOrderByPriorityScoreDescCollectedAtDesc(Pageable pageable);
 }

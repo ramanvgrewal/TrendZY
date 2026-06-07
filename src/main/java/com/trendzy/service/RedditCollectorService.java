@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,28 +26,70 @@ public class RedditCollectorService {
     private String userAgent;
 
     @Value("${reddit.subreddits}")
-    private String subredditsRaw; // comma-separated string — safe with @Value
+    private String subredditsRaw;
 
+    // ─────────────────────────────────────────────────────────────
+    // SIGNAL QUALITY CONSTANTS
+    // ─────────────────────────────────────────────────────────────
+
+    private static final int MIN_UPVOTES      = 2;
+    private static final int MAX_CONTENT_LEN  = 1000;
+
+    /**
+     * High-intent keywords: signals containing these are 3x more likely
+     * to reference a specific buyable product.
+     */
     private static final List<String> BUY_INTENT_KEYWORDS = List.of(
+            // Purchase intent
             "where to buy", "where can i buy", "how to buy", "link to buy",
-            "buy this", "want to buy", "looking to buy", "want this",
-            "where is this from", "where did you get", "source?", "source please",
-            "how much", "price?", "available on", "amazon link", "myntra",
-            "flipkart", "ordered this", "just bought", "purchased",
-            "shopping for", "worth buying", "should i buy", "is it worth",
-            "good quality", "dupe of", "affordable", "budget option",
-            "where to get", "recommend", "suggestions", "link", "review", "worth it", "got this"
+            "want to buy", "looking to buy", "where to get", "where did you get",
+            "where is this from", "just bought", "purchased", "ordered this",
+            "should i buy", "worth buying", "is it worth", "worth it",
+            // Product discovery
+            "source?", "source please", "link?", "amazon link", "myntra link",
+            "available on", "shopping for", "recommend", "suggestions", "review",
+            "dupe of", "affordable", "budget option", "affordable version",
+            "good quality", "got this", "haul", "unboxing",
+            // Price signals
+            "how much", "price?", "₹", "rs ", "inr",
+            // Platform mentions (high purchase signal)
+            "myntra", "flipkart", "meesho", "nykaa", "amazon", "ajio", "bewakoof",
+            "snitch", "urbanic", "h&m india", "zara india"
     );
 
-    private static final List<String> PRODUCT_CATEGORY_KEYWORDS = List.of(
-            "hoodie", "sneakers", "watch", "earbuds", "tshirt", "t-shirt", "jacket",
-            "skincare", "makeup", "gadgets", "shoes", "streetwear", "headphones",
-            "accessories", "wearables", "beauty", "lipstick", "serum", "sneaker"
+    /**
+     * Product category keywords: used for priority scoring.
+     * Signals with these are more likely to contain a specific product to analyze.
+     */
+    private static final List<String> PRODUCT_KEYWORDS = List.of(
+            // Clothing
+            "hoodie", "hoodie", "oversized", "co-ord", "coord", "cargo pants", "baggy jeans",
+            "crop top", "shirt", "t-shirt", "tshirt", "jacket", "blazer", "cardigan",
+            "kurta", "lehenga", "ethnic", "streetwear", "streetstyle", "grunge", "y2k",
+            "cottagecore", "aesthetic", "thrift", "vintage", "indie",
+            // Footwear
+            "sneakers", "sneaker", "shoes", "boots", "loafers", "chunky", "platform shoes",
+            "nike dunk", "new balance", "puma", "campus shoes",
+            // Beauty & Skincare
+            "skincare", "serum", "sunscreen", "spf", "moisturizer", "lip tint", "lipstick",
+            "foundation", "concealer", "blush", "eyeshadow", "eyeliner", "mascara",
+            "brow lamination", "face wash", "toner", "retinol", "niacinamide", "hyaluronic",
+            "vitamin c", "cleanser", "exfoliant", "aha", "bha",
+            // Accessories & Tech
+            "earbuds", "headphones", "watch", "smartwatch", "tote bag", "sling bag",
+            "bucket hat", "cap", "sunglasses", "belt bag", "crossbody", "jewelry",
+            "necklace", "earrings", "rings"
     );
 
-    // Minimum quality thresholds
-    private static final int MIN_UPVOTES = 2;
-    private static final int MAX_CONTENT_LENGTH = 1000; // chars
+    /**
+     * Noise signals — posts containing these are almost always off-topic.
+     * Checking for these prevents wasting AI tokens on irrelevant content.
+     */
+    private static final List<String> NOISE_TERMS = List.of(
+            "politics", "election", "government", "stock", "crypto", "bitcoin",
+            "job", "career", "internship", "salary", "neet", "jee", "upsc",
+            "relationship", "breakup", "marriage", "visa", "passport"
+    );
 
     public RedditCollectorService(SignalRepository signalRepository,
                                   ObjectMapper objectMapper) {
@@ -69,18 +110,27 @@ public class RedditCollectorService {
                 .filter(s -> !s.isBlank())
                 .collect(Collectors.toList());
 
-        log.info("[REDDIT] Starting collection from {} subreddits", subreddits.size());
+        log.info("[REDDIT] Starting collection from {} subreddits (new + hot feeds)",
+                subreddits.size());
 
         int totalCollected = 0;
 
         for (String sub : subreddits) {
             try {
-                int count = collectFromSubreddit(sub);
-                totalCollected += count;
-                log.info("[REDDIT] r/{} → {} new signals collected", sub, count);
+                // Collect from both feeds — "new" gives recency, "hot" gives engagement signal
+                int fromNew = collectFromSubreddit(sub, "new");
+                Thread.sleep(1500);
+                int fromHot = collectFromSubreddit(sub, "hot");
 
-                // Rate limit — be polite to Reddit API
-                Thread.sleep(2000);
+                int subTotal = fromNew + fromHot;
+                totalCollected += subTotal;
+
+                if (subTotal > 0) {
+                    log.info("[REDDIT] r/{} → {} new signals (new={}, hot={})",
+                            sub, subTotal, fromNew, fromHot);
+                }
+
+                Thread.sleep(1500); // polite delay between subreddits
 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -96,13 +146,12 @@ public class RedditCollectorService {
     }
 
     // ─────────────────────────────────────────────────────────────
-    // COLLECT FROM ONE SUBREDDIT
+    // COLLECT FROM ONE SUBREDDIT FEED
     // ─────────────────────────────────────────────────────────────
 
-    private int collectFromSubreddit(String subreddit) {
-        String url = "https://www.reddit.com/r/" + subreddit + "/new.json?limit=100";
-
-        log.debug("[REDDIT] Fetching: {}", url);
+    private int collectFromSubreddit(String subreddit, String feed) {
+        String url = "https://www.reddit.com/r/" + subreddit + "/" + feed + ".json?limit=50";
+        log.debug("[REDDIT] Fetching r/{}/{}", subreddit, feed);
 
         JsonNode response;
         try {
@@ -112,7 +161,7 @@ public class RedditCollectorService {
                     .retrieve()
                     .body(JsonNode.class);
         } catch (Exception e) {
-            log.error("[REDDIT] HTTP error for r/{}: {}", subreddit, e.getMessage());
+            log.error("[REDDIT] HTTP error for r/{}/{}: {}", subreddit, feed, e.getMessage());
             return 0;
         }
 
@@ -129,43 +178,53 @@ public class RedditCollectorService {
         for (JsonNode child : children) {
             try {
                 JsonNode data = child.path("data");
-                String sourceId = data.path("id").asText("");
+                String sourceId = data.path("id").asText("").trim();
 
                 if (sourceId.isBlank()) continue;
+                if (signalRepository.existsBySourceId(sourceId)) continue;
 
-                // Skip duplicates
-                if (signalRepository.existsBySourceId(sourceId)) {
-                    log.debug("[REDDIT] Duplicate signal {} — skipping", sourceId);
-                    continue;
-                }
-
-                // Quality filter — skip low-engagement posts
                 long upvotes = data.path("score").asLong(0);
-                if (upvotes < MIN_UPVOTES) {
-                    log.debug("[REDDIT] Low upvotes ({}) for {} — skipping", upvotes, sourceId);
-                    continue;
-                }
+                if (upvotes < MIN_UPVOTES) continue;
 
                 String title    = data.path("title").asText("").trim();
                 String selftext = data.path("selftext").asText("").trim();
 
-                // Skip deleted/removed posts
-                if (selftext.equals("[deleted]") || selftext.equals("[removed]")) {
+                if (title.isBlank()) continue;
+
+                // Skip deleted or removed posts
+                if ("[deleted]".equals(selftext) || "[removed]".equals(selftext)) {
                     selftext = "";
                 }
 
-                // Truncate to prevent DB bloat
-                String content = (title + " " + selftext).trim();
-                if (content.length() > MAX_CONTENT_LENGTH) {
-                    content = content.substring(0, MAX_CONTENT_LENGTH);
+                String combined = (title + " " + selftext).trim();
+
+                // Drop obvious noise before hitting AI budget
+                if (isNoise(combined)) {
+                    log.debug("[REDDIT] Noise signal skipped: '{}'",
+                            title.substring(0, Math.min(title.length(), 60)));
+                    continue;
                 }
 
-                // Skip if no meaningful content
-                if (title.isBlank()) continue;
+                // Truncate to prevent DB bloat
+                String content = combined.length() > MAX_CONTENT_LEN
+                        ? combined.substring(0, MAX_CONTENT_LEN)
+                        : combined;
 
-                List<String> buyKeywords = extractBuyIntentKeywords(content);
-                boolean hasProductKeyword = hasProductCategoryKeyword(content);
-                int priorityScore = (!buyKeywords.isEmpty() || hasProductKeyword) ? 2 : 1;
+                List<String> buyKeywords    = extractMatchingKeywords(content, BUY_INTENT_KEYWORDS);
+                boolean hasProductKeyword   = hasAnyKeyword(content, PRODUCT_KEYWORDS);
+
+                // Priority scoring:
+                //   3 = has both buy intent AND product keyword (highest value)
+                //   2 = has either buy intent or product keyword
+                //   1 = baseline (still worth analyzing)
+                int priorityScore;
+                if (!buyKeywords.isEmpty() && hasProductKeyword) {
+                    priorityScore = 3;
+                } else if (!buyKeywords.isEmpty() || hasProductKeyword) {
+                    priorityScore = 2;
+                } else {
+                    priorityScore = 1;
+                }
 
                 Signal signal = Signal.builder()
                         .source("reddit")
@@ -184,10 +243,9 @@ public class RedditCollectorService {
                 signalRepository.save(signal);
                 collected++;
 
-                if (!buyKeywords.isEmpty()) {
-                    log.debug("[REDDIT] High-intent signal saved: '{}' | keywords: {}",
-                            title.substring(0, Math.min(title.length(), 60)),
-                            buyKeywords);
+                if (priorityScore == 3) {
+                    log.debug("[REDDIT] High-priority signal: '{}' | keywords={}",
+                            title.substring(0, Math.min(title.length(), 60)), buyKeywords);
                 }
 
             } catch (Exception e) {
@@ -199,20 +257,37 @@ public class RedditCollectorService {
     }
 
     // ─────────────────────────────────────────────────────────────
-    // BUY INTENT EXTRACTION
+    // KEYWORD HELPERS
     // ─────────────────────────────────────────────────────────────
 
-    private List<String> extractBuyIntentKeywords(String content) {
+    private List<String> extractMatchingKeywords(String content, List<String> keywords) {
         if (content == null || content.isBlank()) return List.of();
         String lower = content.toLowerCase();
-        return BUY_INTENT_KEYWORDS.stream()
+        return keywords.stream()
                 .filter(lower::contains)
+                .distinct()
                 .collect(Collectors.toList());
     }
 
-    private boolean hasProductCategoryKeyword(String content) {
+    private boolean hasAnyKeyword(String content, List<String> keywords) {
         if (content == null || content.isBlank()) return false;
         String lower = content.toLowerCase();
-        return PRODUCT_CATEGORY_KEYWORDS.stream().anyMatch(lower::contains);
+        return keywords.stream().anyMatch(lower::contains);
+    }
+
+    /**
+     * Returns true if the content is dominated by off-topic noise terms.
+     * A post is considered noise only if it has ZERO product/buy keywords
+     * AND contains at least one noise term — to avoid false positives.
+     */
+    private boolean isNoise(String content) {
+        if (content == null || content.isBlank()) return true;
+        String lower = content.toLowerCase();
+        boolean hasNoiseTerm = NOISE_TERMS.stream().anyMatch(lower::contains);
+        if (!hasNoiseTerm) return false;
+        // Even if noise term present, keep if a product keyword co-occurs
+        boolean hasProductSignal = hasAnyKeyword(content, PRODUCT_KEYWORDS)
+                || hasAnyKeyword(content, BUY_INTENT_KEYWORDS);
+        return !hasProductSignal;
     }
 }

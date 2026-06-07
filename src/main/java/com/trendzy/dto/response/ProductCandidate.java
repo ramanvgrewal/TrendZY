@@ -24,6 +24,8 @@ public class ProductCandidate {
     private String url;
     private String imageUrl;
     private Double price;
+    private Double originalPrice;
+    private Double discount;
 
     @Builder.Default
     private double score = 0.0;

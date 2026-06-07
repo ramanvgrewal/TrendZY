@@ -28,9 +28,57 @@ spring:
           model: llama-3.3-70b-versatile
           stream: false
 
+# ─────────────────────────────────────────────────────────────
+# REDDIT
+# Subreddit selection rationale:
+#
+#   TIER 1 — India-specific, highest signal density
+#     IndianFashion, IndianBeautyDeals, IndianSkincareRoutine,
+#     IndianFashionAddicts, IndiaShoppee
+#     These contain the most direct "where to buy in India" signals.
+#
+#   TIER 2 — Global but heavily followed by Indian Gen Z
+#     streetwear, SkincareAddiction, MakeupAddiction, AsianBeauty,
+#     femalefashionadvice, malefashionadvice, frugalmalefashion, Sneakers
+#     AsianBeauty is especially valuable — K-beauty trends reach India
+#     about 6-8 weeks after blowing up here, giving us early signal.
+#
+#   TIER 3 — Aesthetic / niche
+#     GenZFashion, Y2Kfashion, cottagecore, OUTFITS, NailArt,
+#     Hair, fragrance, handbags, beauty, 30PlusSkinCare
+#
+#   TIER 4 — Tech wearables (growing category for Trendzy)
+#     Earbuds, watches, HeadphoneAdvice
+# ─────────────────────────────────────────────────────────────
 reddit:
   user-agent: "TrendZY/1.0 (by /u/Few_Ganache_1005)"
-  subreddits: "IndianFashion,IndianBeautyDeals,streetwear,SkincareAddiction,MakeupAddiction,IndianSkincareRoutine,femalefashionadvice,malefashionadvice,beauty,Hair,fragrance,Sneakers,handbags,IndianFashionAddicts,GenZFashion,Y2Kfashion,cottagecore,IndiaShoppee,frugalmalefashion,30PlusSkinCare"
+  subreddits: >
+    IndianFashion,
+    IndianBeautyDeals,
+    IndianSkincareRoutine,
+    IndianFashionAddicts,
+    IndiaShoppee,
+    streetwear,
+    SkincareAddiction,
+    MakeupAddiction,
+    AsianBeauty,
+    femalefashionadvice,
+    malefashionadvice,
+    frugalmalefashion,
+    Sneakers,
+    GenZFashion,
+    Y2Kfashion,
+    cottagecore,
+    OUTFITS,
+    NailArt,
+    Hair,
+    fragrance,
+    handbags,
+    beauty,
+    30PlusSkinCare,
+    Earbuds,
+    watches,
+    HeadphoneAdvice
 
 youtube:
   api-key: ${YOUTUBE_API_KEY:}
@@ -41,9 +89,9 @@ jwt:
 
 scheduler:
   collection:
-    cron: "0 0 2 * * *"
+    cron: "0 0 2 * * *"   # 2 AM daily — collect overnight activity
   analysis:
-    cron: "0 0 4 * * *"
+    cron: "0 0 4 * * *"   # 4 AM daily — analyze after collection completes
 
 groq:
   batch-size: 5
@@ -52,8 +100,4 @@ groq:
 
 scraper:
   instagram:
-    # Directory where instagram_session.json is stored.
-    # Default: ~/.trendzy/instagram_session.json
-    # Override in production to a writable volume path, e.g.:
-    #   session-dir: /var/trendzy/sessions
     session-dir: ${user.home}/.trendzy

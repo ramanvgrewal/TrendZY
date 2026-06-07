@@ -47,7 +47,7 @@ public class InstagramProfileClient {
     );
 
     private static final Pattern REJECT_URL = Pattern.compile(
-            "(facebook\\.com|twitter\\.com|x\\.com|youtube\\.com|tiktok\\.com|javascript|amazon\\.|flipkart\\.|myntra\\.|ajio\\.|meesho\\.|snapdeal\\.|nykaa\\.)",
+            "(facebook\\.com|twitter\\.com|x\\.com|youtube\\.com|tiktok\\.com|javascript|amazon\\.|flipkart\\.|myntra\\.|ajio\\.|meesho\\.|snapdeal\\.|nykaa\\.|meta\\.com|threads\\.net|threads\\.com|wa\\.me|whatsapp\\.com)",
             Pattern.CASE_INSENSITIVE
     );
 

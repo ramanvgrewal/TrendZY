@@ -3,7 +3,7 @@ import { useOutletContext } from 'react-router-dom';
 import { fetchTrends, isBackendOffline } from '../api/client';
 import { getSessionId } from '../utils/session';
 import TrendCard from '../components/TrendCard';
-import SkeletonCard from '../components/SkeletonCard';
+import SkeletonCard from '../components/ui/SkeletonCard';
 import FilterBar from '../components/FilterBar';
 
 export default function IndiaPage() {

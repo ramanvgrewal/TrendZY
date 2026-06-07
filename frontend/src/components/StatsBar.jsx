@@ -1,8 +1,8 @@
 const stats = [
-  { icon: '??', label: 'Signals', value: 47 },
-  { icon: '??', label: 'Trends', value: 10 },
-  { icon: '????', label: 'India', value: 8 },
-  { icon: '??', label: 'Subreddits', value: 24 },
+  { icon: '📡', label: 'Signals', value: 47 },
+  { icon: '🔥', label: 'Trends',  value: 10 },
+  { icon: '🇮🇳', label: 'India',  value: 8  },
+  { icon: '📢', label: 'Subreddits', value: 24 },
 ];
 
 export default function StatsBar() {

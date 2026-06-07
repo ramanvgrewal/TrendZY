@@ -41,7 +41,7 @@ export default function CuratedSection() {
                             <button onClick={() => scroll('left')} className="curated-scroll-btn">&larr;</button>
                             <button onClick={() => scroll('right')} className="curated-scroll-btn">&rarr;</button>
                         </div>
-                        <Link to="/only-on-trendzy" className="curated-explore-link">
+                        <Link to="/curated" className="curated-explore-link">
                             Explore All →
                         </Link>
                     </div>

@@ -22,8 +22,11 @@ public class RawProduct {
     /** Raw product title as it appears on the website. */
     private String productName;
 
-    /** Price as a {@code double} to preserve precision before INR conversion. */
-    private double price;
+    /** Original/MRP price structure. */
+    private Double mainPrice;
+
+    /** Sale/discounted price structure, if applies. */
+    private Double discountedPrice;
 
     /** Full CDN or absolute image URL. */
     private String imageUrl;

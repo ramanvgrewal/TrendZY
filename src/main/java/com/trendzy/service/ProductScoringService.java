@@ -131,14 +131,16 @@ public class ProductScoringService {
         // ── 3. Product type match (+20) ──
         if (fp != null && fp.getProductType() != null && !fp.getProductType().isBlank()) {
             String typeLower = fp.getProductType().toLowerCase();
+            String typeRoot = typeLower.replaceAll("es$", "").replaceAll("s$", "");
             if (titleLower.contains(typeLower)) {
                 score += 20;
+            } else if (titleLower.contains(typeRoot)) {
+                score += 15;
             } else {
-                // Try partial match (e.g., "sneakers" matching "sneaker")
-                String typeRoot = typeLower.replaceAll("s$", "");
-                if (titleLower.contains(typeRoot)) {
-                    score += 15;
-                }
+                // Reject if type is totally missing
+                candidate.setRejected(true);
+                candidate.setRejectionReason("Type mismatch: Expected '" + fp.getProductType() + "'");
+                return 0;
             }
         }
 

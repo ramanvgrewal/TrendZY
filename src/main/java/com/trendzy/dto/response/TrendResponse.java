@@ -27,6 +27,7 @@ public class TrendResponse {
     private String aiSummary;
     private List<String> whyTrending;
     private String indiaRelevanceNote;
+    private boolean indiaRelevant;
     
     private long totalSignals;
     private List<String> detectedSubreddits;

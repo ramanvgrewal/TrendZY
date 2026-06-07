@@ -145,8 +145,8 @@ public class ProductValidator {
         if (extractedPrice == null || extractedPrice <= 0) {
             return false;
         }
-        product.setPrice(extractedPrice);
-        if (extractedPrice < 400 || extractedPrice > 2000) {
+        product.setMainPrice(extractedPrice);
+        if (extractedPrice < 300 || extractedPrice > 5999) {
             return false;
         }
 

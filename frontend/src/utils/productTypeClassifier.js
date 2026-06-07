@@ -10,6 +10,7 @@ const TYPE_MAP = [
     // ── FOOTWEAR ──────────────────────────────────────────────
     {
         key: 'sneakers',
+        parentCategory: 'Footwear',
         label: 'Sneakers',
         emoji: '👟',
         accent: '#a3e635',
@@ -22,6 +23,7 @@ const TYPE_MAP = [
     },
     {
         key: 'boots',
+        parentCategory: 'Footwear',
         label: 'Boots',
         emoji: '🥾',
         accent: '#d97706',
@@ -33,6 +35,7 @@ const TYPE_MAP = [
     },
     {
         key: 'loafers',
+        parentCategory: 'Footwear',
         label: 'Loafers & Flats',
         emoji: '👞',
         accent: '#fbbf24',
@@ -41,6 +44,7 @@ const TYPE_MAP = [
     },
     {
         key: 'sandals',
+        parentCategory: 'Footwear',
         label: 'Sandals & Slides',
         emoji: '🩴',
         accent: '#34d399',
@@ -51,6 +55,7 @@ const TYPE_MAP = [
     // ── TOPS ──────────────────────────────────────────────────
     {
         key: 'tees',
+        parentCategory: 'Clothing',
         label: 'T-Shirts & Tees',
         emoji: '👕',
         accent: '#fbbf24',
@@ -62,6 +67,7 @@ const TYPE_MAP = [
     },
     {
         key: 'shirts',
+        parentCategory: 'Clothing',
         label: 'Shirts',
         emoji: '👔',
         accent: '#60a5fa',
@@ -73,6 +79,7 @@ const TYPE_MAP = [
     },
     {
         key: 'tops',
+        parentCategory: 'Clothing',
         label: 'Tops & Blouses',
         emoji: '🫧',
         accent: '#f472b6',
@@ -84,6 +91,7 @@ const TYPE_MAP = [
     },
     {
         key: 'kurta',
+        parentCategory: 'Clothing',
         label: 'Kurtas & Ethnics',
         emoji: '🌿',
         accent: '#6ee7b7',
@@ -98,6 +106,7 @@ const TYPE_MAP = [
     // ── HOODIES & SWEATSHIRTS ─────────────────────────────────
     {
         key: 'hoodies',
+        parentCategory: 'Clothing',
         label: 'Hoodies & Sweatshirts',
         emoji: '🧥',
         accent: '#fb923c',
@@ -111,6 +120,7 @@ const TYPE_MAP = [
     // ── OUTERWEAR ─────────────────────────────────────────────
     {
         key: 'jackets',
+        parentCategory: 'Clothing',
         label: 'Jackets',
         emoji: '🫶',
         accent: '#f97316',
@@ -122,6 +132,7 @@ const TYPE_MAP = [
     },
     {
         key: 'shackets',
+        parentCategory: 'Clothing',
         label: 'Shackets & Overshirts',
         emoji: '🍂',
         accent: '#d97706',
@@ -130,6 +141,7 @@ const TYPE_MAP = [
     },
     {
         key: 'coats',
+        parentCategory: 'Clothing',
         label: 'Coats & Blazers',
         emoji: '🎩',
         accent: '#94a3b8',
@@ -140,6 +152,7 @@ const TYPE_MAP = [
     // ── BOTTOMS ───────────────────────────────────────────────
     {
         key: 'jeans',
+        parentCategory: 'Clothing',
         label: 'Denim & Jeans',
         emoji: '👖',
         accent: '#818cf8',
@@ -152,6 +165,7 @@ const TYPE_MAP = [
     },
     {
         key: 'cargo',
+        parentCategory: 'Clothing',
         label: 'Cargo Pants',
         emoji: '🪖',
         accent: '#a3e635',
@@ -163,6 +177,7 @@ const TYPE_MAP = [
     },
     {
         key: 'trousers',
+        parentCategory: 'Clothing',
         label: 'Trousers & Chinos',
         emoji: '👔',
         accent: '#c4b5fd',
@@ -171,6 +186,7 @@ const TYPE_MAP = [
     },
     {
         key: 'shorts',
+        parentCategory: 'Clothing',
         label: 'Shorts',
         emoji: '🩳',
         accent: '#34d399',
@@ -179,6 +195,7 @@ const TYPE_MAP = [
     },
     {
         key: 'skirts',
+        parentCategory: 'Clothing',
         label: 'Skirts & Minis',
         emoji: '🌷',
         accent: '#f9a8d4',
@@ -189,6 +206,7 @@ const TYPE_MAP = [
     // ── CO-ORDS & DRESSES ─────────────────────────────────────
     {
         key: 'coords',
+        parentCategory: 'Clothing',
         label: 'Co-ord Sets',
         emoji: '🪡',
         accent: '#2dd4bf',
@@ -200,6 +218,7 @@ const TYPE_MAP = [
     },
     {
         key: 'dresses',
+        parentCategory: 'Clothing',
         label: 'Dresses',
         emoji: '👗',
         accent: '#f472b6',
@@ -213,6 +232,7 @@ const TYPE_MAP = [
     // ── BEAUTY & SKINCARE ─────────────────────────────────────
     {
         key: 'serums',
+        parentCategory: 'Beauty & Skincare',
         label: 'Serums & Skincare',
         emoji: '🧴',
         accent: '#f472b6',
@@ -226,6 +246,7 @@ const TYPE_MAP = [
     },
     {
         key: 'makeup',
+        parentCategory: 'Beauty & Skincare',
         label: 'Makeup',
         emoji: '💄',
         accent: '#fb7185',
@@ -239,6 +260,7 @@ const TYPE_MAP = [
     },
     {
         key: 'haircare',
+        parentCategory: 'Beauty & Skincare',
         label: 'Hair & Body',
         emoji: '💆',
         accent: '#c084fc',
@@ -253,6 +275,7 @@ const TYPE_MAP = [
     // ── ACCESSORIES ───────────────────────────────────────────
     {
         key: 'watches',
+        parentCategory: 'Bags & Accessories',
         label: 'Watches & Timepieces',
         emoji: '⌚',
         accent: '#94a3b8',
@@ -261,6 +284,7 @@ const TYPE_MAP = [
     },
     {
         key: 'bags',
+        parentCategory: 'Bags & Accessories',
         label: 'Bags & Totes',
         emoji: '👜',
         accent: '#fbbf24',
@@ -272,6 +296,7 @@ const TYPE_MAP = [
     },
     {
         key: 'caps',
+        parentCategory: 'Bags & Accessories',
         label: 'Caps & Hats',
         emoji: '🧢',
         accent: '#a3e635',
@@ -283,6 +308,7 @@ const TYPE_MAP = [
     },
     {
         key: 'jewelry',
+        parentCategory: 'Bags & Accessories',
         label: 'Jewelry',
         emoji: '💍',
         accent: '#c4b5fd',
@@ -295,6 +321,7 @@ const TYPE_MAP = [
     },
     {
         key: 'hairclips',
+        parentCategory: 'Bags & Accessories',
         label: 'Hair Accessories',
         emoji: '🎀',
         accent: '#f9a8d4',
@@ -306,6 +333,7 @@ const TYPE_MAP = [
     },
     {
         key: 'sunglasses',
+        parentCategory: 'Bags & Accessories',
         label: 'Sunglasses & Eyewear',
         emoji: '🕶️',
         accent: '#fcd34d',
@@ -314,6 +342,7 @@ const TYPE_MAP = [
     },
     {
         key: 'scarves',
+        parentCategory: 'Bags & Accessories',
         label: 'Scarves & Wraps',
         emoji: '🧣',
         accent: '#6ee7b7',
@@ -322,6 +351,7 @@ const TYPE_MAP = [
     },
     {
         key: 'belts',
+        parentCategory: 'Bags & Accessories',
         label: 'Belts & Wallets',
         emoji: '🪬',
         accent: '#d97706',
@@ -332,6 +362,7 @@ const TYPE_MAP = [
     // ── TECH & LIFESTYLE ──────────────────────────────────────
     {
         key: 'tech',
+        parentCategory: 'Tech & Lifestyle',
         label: 'Tech & Gadgets',
         emoji: '📱',
         accent: '#60a5fa',
@@ -343,6 +374,7 @@ const TYPE_MAP = [
     },
     {
         key: 'lifestyle',
+        parentCategory: 'Tech & Lifestyle',
         label: 'Lifestyle',
         emoji: '✨',
         accent: '#a78bfa',
@@ -353,6 +385,7 @@ const TYPE_MAP = [
 
 const DEFAULT_TYPE = {
     key: 'other',
+    parentCategory: 'Other',
     label: 'Other',
     emoji: '✦',
     accent: '#737373',
@@ -400,7 +433,7 @@ export function detectProductType(product) {
 }
 
 /**
- * Groups an array of products by detected product type.
+ * Groups an array of products by detected sub-type.
  * Returns: Array of [typeConfig, products[]] sorted by count desc.
  */
 export function groupByProductType(data) {
@@ -411,6 +444,45 @@ export function groupByProductType(data) {
         const cfg = detectProductType(p);
         if (!map[cfg.key]) map[cfg.key] = { cfg, products: [] };
         map[cfg.key].products.push(p);
+    });
+
+    return Object.values(map)
+        .sort((a, b) => b.products.length - a.products.length);
+}
+
+/**
+ * Groups an array of products by Parent Category (Fashion, Beauty, etc.)
+ */
+export function groupByParentCategory(data) {
+    const arr = data?.content ?? (Array.isArray(data) ? data : []);
+    const map = {};
+
+    const parentAesthetics = {
+        'Clothing': { emoji: '👗', accent: '#a3e635', dim: 'rgba(163,230,53,0.1)' },
+        'Footwear': { emoji: '👟', accent: '#fbbf24', dim: 'rgba(251,191,36,0.1)' },
+        'Beauty & Skincare': { emoji: '🧴', accent: '#f472b6', dim: 'rgba(244,114,182,0.1)' },
+        'Bags & Accessories': { emoji: '👜', accent: '#60a5fa', dim: 'rgba(96,165,250,0.1)' },
+        'Tech & Lifestyle': { emoji: '📱', accent: '#c4b5fd', dim: 'rgba(196,181,253,0.1)' },
+        'Other': { emoji: '✦', accent: '#94a3b8', dim: 'rgba(148,163,184,0.1)' }
+    };
+
+    arr.forEach((p) => {
+        const cfg = detectProductType(p);
+        const pKey = cfg.parentCategory || 'Other';
+        if (!map[pKey]) {
+            const aes = parentAesthetics[pKey] || parentAesthetics['Other'];
+            map[pKey] = {
+                cfg: {
+                    key: pKey.replace(/\s+/g, '-').toLowerCase(),
+                    label: pKey,
+                    emoji: aes.emoji,
+                    accent: aes.accent,
+                    dim: aes.dim
+                },
+                products: []
+            };
+        }
+        map[pKey].products.push(p);
     });
 
     return Object.values(map)

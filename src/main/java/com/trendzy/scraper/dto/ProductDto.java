@@ -52,8 +52,14 @@ public class ProductDto {
     /** Direct product page URL (no affiliate tags). */
     private String websiteLink;
 
-    /** Price in Indian Rupees. */
-    private int priceInr;
+    /** Original/MRP price. */
+    private Integer mainPrice;
+
+    /** Sale/discounted price, if applies. */
+    private Integer discountedPrice;
+
+    /** Section parameter which targets specific hashtags. */
+    private String section;
 
     /**
      * Human-readable price band, e.g. {@code "800-1200"}.
