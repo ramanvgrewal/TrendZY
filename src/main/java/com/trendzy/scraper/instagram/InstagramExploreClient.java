@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -45,16 +46,13 @@ public class InstagramExploreClient {
     private static final int    DOM_SETTLE_TIMEOUT = 10_000;
 
     /** Hashtag searches in specific order as per Phase 1. */
-    private static final List<String> STREETWEAR_TAGS = List.of(
-            "streetwearindia",
-            "indianstreetwear",
-            "d2cbrand",
-            "oversizedtshirt",
-            "y2kfashionindia",
-            "genzfashion",
-            "indiad2c",
-            "newdrop",
-            "brandedclothing"
+    private static final Map<String, List<String>> SECTION_TAGS = Map.of(
+            "STREETWEAR", List.of("streetwearindia", "indianstreetwear", "d2cbrand", "oversizedtshirt", "y2kfashionindia", "genzfashion", "indiad2c", "newdrop", "brandedclothing"),
+            "CRICKET", List.of("cricketindia", "indiancricket", "cricketmerch", "bleedblue", "cricketfans", "iplmerch", "cricketapparel", "cricketjersey"),
+            "GYM", List.of("gymwearindia", "activewearindia", "fitnessapparel", "gymgear", "workoutclothes", "gymfashion", "athleisureindia", "indianfitness"),
+            "ANIME", List.of("animeclothingindia", "animemerchindia", "otakufashion", "animeapparel", "animestreetwear", "weebmerch", "animeindia", "mangaapparel"),
+            "SNEAKERS", List.of("sneakerheadindia", "sneakersindia", "kicksindia", "sneakerstore", "solecollectorindia", "streetwearsneakers", "sneakercommunityindia"),
+            "CODING", List.of("devmerch", "codingtshirts", "programmerclothing", "techapparel", "developersindia", "softwareengineer", "codinglife", "techmerch")
     );
     private static final int    SCROLL_COUNT_PER_TAG = 2; // Scroll 2-3 times
     private static final int    POSTS_PER_TAG        = 8; // Collect 5-8 posts per hashtag
@@ -72,8 +70,9 @@ public class InstagramExploreClient {
      * Follows Phase 1 instructions.
      *
      * @param playwright a live {@link Playwright} instance owned by the caller
+     * @param section the specific section corresponding to hashtags to scrape
      */
-    public List<String> fetchExplorePosts(Playwright playwright) {
+    public List<String> fetchExplorePosts(Playwright playwright, String section) {
         Set<String> postUrls = new LinkedHashSet<>();
 
         if (!sessionManager.ensureSession(playwright)) {
@@ -88,7 +87,8 @@ public class InstagramExploreClient {
             Page page = context.newPage();
 
             // ── Phase 1: Hashtag Discovery ─────────────────
-            for (String tag : STREETWEAR_TAGS) {
+            List<String> currentTags = SECTION_TAGS.getOrDefault(section == null ? "" : section.toUpperCase(), SECTION_TAGS.get("STREETWEAR"));
+            for (String tag : currentTags) {
                 if (postUrls.size() >= MIN_POSTS_TOTAL) break;
                 String tagUrl = String.format(SEARCH_URL_TMPL, tag);
                 collectFromTagUrl(page, tagUrl, postUrls);

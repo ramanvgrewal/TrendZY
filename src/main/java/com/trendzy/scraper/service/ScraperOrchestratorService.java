@@ -49,8 +49,8 @@ public class ScraperOrchestratorService {
     // ── Pipeline parameters ──────────────────────────────────────
     private static final int    TARGET_PRODUCTS    = 15;
     private static final int    HARD_LIMIT         = 50;  // max raw products validated
-    private static final double MIN_PRICE_INR      = 400.0;
-    private static final double MAX_PRICE_INR      = 2000.0;
+    private static final double MIN_PRICE_INR      = 300.0;
+    private static final double MAX_PRICE_INR      = 5999.0;
 
     // Brands to reject (luxury, marketplace, formal)
     private static final Set<String> REJECT_BRANDS = Set.of(
@@ -66,12 +66,14 @@ public class ScraperOrchestratorService {
             "wedding", "saree", "lehenga", "sherwani", "kurta set for wedding"
     );
 
-    // Terms that increase streetwear relevance score
-    private static final List<String> STREETWEAR_TERMS = List.of(
-            "oversized", "baggy", "graphic", "streetwear", "hoodie", "cargo",
-            "tee", "t-shirt", "sweatshirt", "jogger", "denim", "sneaker",
-            "drop", "limited", "collab", "vibe", "gen z", "urban", "minimal",
-            "boxy", "embroidery", "typography", "print", "y2k", "crop", "distressed"
+    // Terms that increase relevance score based on section
+    private static final Map<String, List<String>> SECTION_TERMS = Map.of(
+            "STREETWEAR", List.of("oversized", "baggy", "graphic", "streetwear", "hoodie", "cargo", "tee", "drop", "y2k", "vintage", "boxy", "t-shirt", "tshirt", "sweatshirt"),
+            "CRICKET", List.of("cricket", "jersey", "match", "ipl", "rcb", "csk", "mi", "bat", "fan", "bleed blue", "dhoni", "kohli", "t-shirt", "tshirt", "tee"),
+            "GYM", List.of("gym", "activewear", "workout", "fitness", "muscle", "dry fit", "compression", "tank", "stringer", "jogger", "athlete", "t-shirt", "tshirt", "tee"),
+            "ANIME", List.of("anime", "manga", "naruto", "luffy", "zoro", "otaku", "gojo", "jujutsu", "attack on titan", "demon slayer", "dbz", "t-shirt", "tshirt", "tee", "hoodie"),
+            "SNEAKERS", List.of("sneaker", "jordan", "nike", "dunk", "yeezy", "sole", "kicks", "high top", "low top", "shoe"),
+            "CODING", List.of("code", "dev", "hacker", "programmer", "tech", "linux", "python", "java", "github", "ctrl", "debug", "t-shirt", "tshirt", "tee", "hoodie")
     );
 
     // Auto-assigned vibes based on product keywords
@@ -102,10 +104,11 @@ public class ScraperOrchestratorService {
     /**
      * Runs the full discovery pipeline.
      *
+     * @param section the curated category section to target (e.g. STREETWEAR, ANIME).
      * @return list of {@link ProductDto} (10–15 items); empty list on total failure
      */
-    public List<ProductDto> discoverProducts() {
-        log.info("[PIPELINE] ════════════════ STARTING PRODUCT DISCOVERY ════════════════");
+    public List<ProductDto> discoverProducts(String section) {
+        log.info("[PIPELINE] ════════════════ STARTING PRODUCT DISCOVERY [{}] ════════════════", section);
         List<ProductDto> finalProducts = new ArrayList<>();
 
         try (Playwright playwright = Playwright.create()) {
@@ -117,8 +120,8 @@ public class ScraperOrchestratorService {
             }
 
             // ── Step 2: Explore → post URLs (Phase 1) ─────────
-            log.info("[PIPELINE] Step 1: Scraping Instagram hashtag pages...");
-            List<String> postUrls = exploreClient.fetchExplorePosts(playwright);
+            log.info("[PIPELINE] Step 1: Scraping Instagram hashtag pages for section: {}...", section);
+            List<String> postUrls = exploreClient.fetchExplorePosts(playwright, section);
             log.info("[PIPELINE] Step 1 complete — {} post URLs found", postUrls.size());
 
             if (postUrls.isEmpty()) {
@@ -184,8 +187,8 @@ public class ScraperOrchestratorService {
             log.info("[PIPELINE] Steps 3–5 complete — {} validated candidates", allValidated.size());
 
             // ── Step 6: Filter by price + style (Phase 5) ─────
-            log.info("[PIPELINE] Step 6: Applying price + style filters...");
-            List<ValidatedCandidate> filtered = applyFinalFilters(allValidated);
+            log.info("[PIPELINE] Step 6: Applying price + style filters for {}...", section);
+            List<ValidatedCandidate> filtered = applyFinalFilters(allValidated, section);
             log.info("[PIPELINE] Step 6 complete — {} products passed filters", filtered.size());
 
             // ── Step 7: Deduplication (Phase 5) ───────────────
@@ -198,7 +201,7 @@ public class ScraperOrchestratorService {
             // Take top 15 after sorting by score
             List<ValidatedCandidate> top15 = deduped.stream().limit(15).collect(Collectors.toList());
             for (ValidatedCandidate vc : top15) {
-                ProductDto dto = transformToDto(vc.product(), vc.brand());
+                ProductDto dto = transformToDto(vc.product(), vc.brand(), section);
                 finalProducts.add(dto);
             }
 
@@ -221,9 +224,9 @@ public class ScraperOrchestratorService {
                 .filter(p -> p.getProductUrl() != null && !p.getProductUrl().isBlank())
                 .filter(p -> {
                     // Price check: skip if price is known and out of range
-                    // (price = 0 means unknown — allow through, validator will confirm)
-                    double price = p.getPrice();
-                    return price == 0.0 || (price >= MIN_PRICE_INR && price <= MAX_PRICE_INR);
+                    // (price = 0 or null means unknown — allow through, validator will confirm)
+                    Double price = p.getMainPrice();
+                    return price == null || price == 0.0 || (price >= MIN_PRICE_INR && price <= MAX_PRICE_INR);
                 })
                 .filter(p -> !isFormalProduct(p.getProductName()))
                 .filter(p -> !isRejectedBrand(brandUsername))
@@ -234,16 +237,16 @@ public class ScraperOrchestratorService {
     // FINAL FILTERS (price + style)
     // ─────────────────────────────────────────────────────────────
 
-    private List<ValidatedCandidate> applyFinalFilters(List<ValidatedCandidate> candidates) {
+    private List<ValidatedCandidate> applyFinalFilters(List<ValidatedCandidate> candidates, String section) {
         return candidates.stream()
                 .filter(vc -> {
-                    double price = vc.product().getPrice();
+                    Double price = vc.product().getMainPrice();
                     // Must have a confirmed price in range
-                    return price >= MIN_PRICE_INR && price <= MAX_PRICE_INR;
+                    return price != null && price >= MIN_PRICE_INR && price <= MAX_PRICE_INR;
                 })
                 .filter(vc -> {
                     String name = vc.product().getProductName().toLowerCase();
-                    // productName DOES contain at least one streetwear term OR does not contain any formal term
+                    // productName DOES NOT contain any formal term
                     return !isFormalProduct(name);
                 })
                 .filter(vc -> {
@@ -252,7 +255,7 @@ public class ScraperOrchestratorService {
                            && vc.product().getProductUrl() != null && !vc.product().getProductUrl().isBlank();
                 })
                 .sorted(Comparator.comparingDouble((ValidatedCandidate vc) ->
-                        streetwearScore(vc.product().getProductName())).reversed())
+                        (double) relevanceScore(vc.product().getProductName(), section)).reversed())
                 .collect(Collectors.toList());
     }
 
@@ -289,28 +292,33 @@ public class ScraperOrchestratorService {
     // DTO TRANSFORMATION
     // ─────────────────────────────────────────────────────────────
 
-    private ProductDto transformToDto(RawProduct product, BrandDto brand) {
+    private ProductDto transformToDto(RawProduct product, BrandDto brand, String section) {
         String name     = product.getProductName();
         String nameLower = name.toLowerCase();
 
         // ── Category ──────────────────────────────────────────
-        String category = inferCategory(nameLower);
+        String category = inferCategory(nameLower, section);
 
         // ── Product type ──────────────────────────────────────
         String productType = inferProductType(nameLower);
 
         // ── Price ─────────────────────────────────────────────
-        int priceInr   = (int) Math.round(product.getPrice());
-        String priceRange = buildPriceRange(priceInr);
+        Double mainPriceVal = product.getMainPrice();
+        Integer mainPrice = mainPriceVal != null ? (int) Math.round(mainPriceVal) : null;
+        
+        Double discountedPriceVal = product.getDiscountedPrice();
+        Integer discountedPrice = discountedPriceVal != null ? (int) Math.round(discountedPriceVal) : null;
+        
+        String priceRange = buildPriceRange(mainPrice != null ? mainPrice : 0);
 
         // ── Description ───────────────────────────────────────
         String description = buildDescription(name, brand.getUsername(), productType);
 
         // ── Vibe tags (exactly 3) ─────────────────────────────
-        List<String> vibeTags = buildVibeTags(nameLower, category);
+        List<String> vibeTags = buildVibeTags(nameLower, category, section);
 
-        // ── Featured: top 20% by streetwear score ─────────────
-        boolean featured = streetwearScore(name) >= 3;
+        // ── Featured: top 20% by relevance score ─────────────
+        boolean featured = relevanceScore(name, section) >= 2;
 
         // ── Image URL (prefer non-null from scrape, fall back) ─
         String imageUrl = product.getImageUrl() != null ? product.getImageUrl() : "";
@@ -323,11 +331,13 @@ public class ScraperOrchestratorService {
                 .imageUrl(imageUrl)
                 .websiteLink(product.getProductUrl() != null
                         ? product.getProductUrl().split("\\?")[0] : "")
-                .priceInr(priceInr)
+                .mainPrice(mainPrice)
+                .discountedPrice(discountedPrice)
                 .priceRange(priceRange)
                 .description(description)
                 .featured(featured)
                 .vibeTags(vibeTags)
+                .section(section)
                 .build();
     }
 
@@ -354,11 +364,15 @@ public class ScraperOrchestratorService {
     // INFERENCE HELPERS
     // ─────────────────────────────────────────────────────────────
 
-    private String inferCategory(String nameLower) {
+    private String inferCategory(String nameLower, String section) {
         if (nameLower.contains("y2k") || nameLower.contains("crop") || nameLower.contains("halter"))
             return "Y2K Fashion";
         if (nameLower.contains("sustainable") || nameLower.contains("hemp") || nameLower.contains("organic"))
             return "Sustainable";
+        
+        if (section != null && !section.equalsIgnoreCase("ALL")) {
+            return toTitleCase(section);
+        }
         return "Streetwear";
     }
 
@@ -409,7 +423,7 @@ public class ScraperOrchestratorService {
         return desc;
     }
 
-    private List<String> buildVibeTags(String nameLower, String category) {
+    private List<String> buildVibeTags(String nameLower, String category, String section) {
         List<String> tags = new ArrayList<>();
 
         // Map keywords to vibes (Phase 6)
@@ -429,9 +443,11 @@ public class ScraperOrchestratorService {
         if (nameLower.contains("typography")) tags.add("BoldText");
         if (nameLower.contains("drop") || nameLower.contains("limited")) tags.add("LimitedDrop");
 
-        // Always include GenZ and Streetwear (Phase 6)
+        // Always include GenZ and the Section
         if (!tags.contains("GenZ")) tags.add("GenZ");
-        if (!tags.contains("Streetwear")) tags.add("Streetwear");
+        
+        String sectionVibe = section != null ? toTitleCase(section) : "Streetwear";
+        if (!tags.contains(sectionVibe)) tags.add(sectionVibe);
 
         // Fill remaining slots
         while (tags.size() < 3) {
@@ -442,10 +458,12 @@ public class ScraperOrchestratorService {
         return tags.stream().distinct().limit(3).collect(Collectors.toList());
     }
 
-    private int streetwearScore(String name) {
+    private int relevanceScore(String name, String section) {
         String lower = name.toLowerCase();
         int score = 0;
-        for (String term : STREETWEAR_TERMS) {
+        List<String> terms = SECTION_TERMS.getOrDefault(section != null ? section.toUpperCase() : "STREETWEAR", 
+                                                        SECTION_TERMS.get("STREETWEAR"));
+        for (String term : terms) {
             if (lower.contains(term)) score++;
         }
         return score;

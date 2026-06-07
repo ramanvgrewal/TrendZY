@@ -147,24 +147,43 @@ public class GenericParser {
         if (title == null || title.isBlank()) return null;
 
         // ── Price ─────────────────────────────────────────────
-        double price = 0.0;
-        for (String sel : List.of(".price", ".amount", ".woocommerce-Price-amount",
-                "[class*='price']", "[itemprop='price']", "[class*='amount']")) {
-            try {
-                ElementHandle el = card.querySelector(sel);
-                if (el != null) {
-                    String raw = el.innerText();
-                    Matcher m = PRICE_PATTERN.matcher(raw);
-                    if (m.find()) {
-                        price = Double.parseDouble(m.group(1).replace(",", ""));
-                        break;
+        Double mainPrice = null;
+        Double discountedPrice = null;
+        
+        // 1. Try to find explicit sale + regular prices
+        try {
+            ElementHandle regularEl = card.querySelector("del .amount, del");
+            ElementHandle saleEl = card.querySelector("ins .amount, ins");
+            
+            if (regularEl != null && saleEl != null) {
+                Matcher mReg = PRICE_PATTERN.matcher(regularEl.innerText());
+                if (mReg.find()) mainPrice = Double.parseDouble(mReg.group(1).replace(",", ""));
+                
+                Matcher mSale = PRICE_PATTERN.matcher(saleEl.innerText());
+                if (mSale.find()) discountedPrice = Double.parseDouble(mSale.group(1).replace(",", ""));
+            }
+        } catch (Exception ignored) {}
+        
+        // 2. Fallback to generic price extraction if no discount structure
+        if (mainPrice == null && discountedPrice == null) {
+            for (String sel : List.of(".price", ".amount", ".woocommerce-Price-amount",
+                    "[class*='price']", "[itemprop='price']", "[class*='amount']")) {
+                try {
+                    ElementHandle el = card.querySelector(sel);
+                    if (el != null) {
+                        String raw = el.innerText();
+                        Matcher m = PRICE_PATTERN.matcher(raw);
+                        if (m.find()) {
+                            mainPrice = Double.parseDouble(m.group(1).replace(",", ""));
+                            break;
+                        }
                     }
-                }
-            } catch (Exception ignored) {}
+                } catch (Exception ignored) {}
+            }
         }
 
         // Pre-filter by price (Phase 3D)
-        if (price > 0 && (price < 400 || price > 2000)) return null;
+        if (mainPrice != null && mainPrice > 0 && (mainPrice < 400 || mainPrice > 2000)) return null;
 
         // ── Image ─────────────────────────────────────────────
         String imageUrl = null;
@@ -197,7 +216,8 @@ public class GenericParser {
 
         return RawProduct.builder()
                 .productName(title)
-                .price(price)
+                .mainPrice(mainPrice)
+                .discountedPrice(discountedPrice)
                 .imageUrl(imageUrl)
                 .productUrl(productUrl)
                 .build();

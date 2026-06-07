@@ -20,6 +20,17 @@ public interface TrendRepository extends MongoRepository<Trend, String> {
     @Query("{ 'vibeTags': ?0, 'active': true }")
     Page<Trend> findByVibeTagAndActiveTrue(String vibeTag, Pageable pageable);
 
+    // ── India Relevant ──────────────────────────────────────────
+    Page<Trend> findByIndiaRelevantAndActiveTrue(boolean indiaRelevant, Pageable pageable);
+
+    Page<Trend> findByTierAndIndiaRelevantAndActiveTrue(String tier, boolean indiaRelevant, Pageable pageable);
+
+    @Query("{ 'tier': ?0, 'vibeTags': ?1, 'indiaRelevant': ?2, 'active': true }")
+    Page<Trend> findByTierAndVibeTagAndIndiaRelevantAndActiveTrue(String tier, String vibeTag, boolean indiaRelevant, Pageable pageable);
+
+    @Query("{ 'vibeTags': ?0, 'indiaRelevant': ?1, 'active': true }")
+    Page<Trend> findByVibeTagAndIndiaRelevantAndActiveTrue(String vibeTag, boolean indiaRelevant, Pageable pageable);
+
     boolean existsByProductNameIgnoreCase(String productName);
 
     @Query(value = "{ 'active': true }", sort = "{ 'trendScore': -1 }")
@@ -27,6 +38,7 @@ public interface TrendRepository extends MongoRepository<Trend, String> {
 
     long countByTier(String tier);
     long countByActiveTrue();
+    long countByIndiaRelevantTrueAndActiveTrue();
 
     List<Trend> findByCategoryAndIdNotAndActiveTrue(String category, String id, Pageable pageable);
 

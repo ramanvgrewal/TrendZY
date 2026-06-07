@@ -48,7 +48,7 @@ public class ShopifyParser {
      * @param storeRoot  base URL, e.g. {@code https://example.myshopify.com}
      * @return list of {@link RawProduct} — may be empty, never null
      */
-    public List<RawProduct> extractProducts(Page page, String storeRoot) {
+    public List<RawProduct> extractProducts(Page page, String storeRoot, String resolvedUrl) {
         List<RawProduct> products = new ArrayList<>();
 
         // ── Strategy 1: JSON API ──────────────────────────────
@@ -60,8 +60,31 @@ public class ShopifyParser {
 
         log.debug("[SHOPIFY] JSON API empty — falling back to DOM scrape for {}", storeRoot);
 
-        // ── Strategy 2: DOM collection page ──────────────────
-        products = extractViaDom(page, storeRoot);
+        // ── Strategy 2: DOM current page ──────────────────────
+        try {
+            page.navigate(resolvedUrl);
+            RandomDelayUtil.delay();
+            products = extractViaDomCards(page, storeRoot);
+            if (!products.isEmpty()) {
+                log.info("[SHOPIFY] DOM scrape of {} yielded {} products", resolvedUrl, products.size());
+                return products;
+            }
+        } catch (Exception e) {
+            log.trace("[SHOPIFY] Failed to scrape {}: {}", resolvedUrl, e.getMessage());
+        }
+
+        // ── Strategy 3: DOM collections page ──────────────────
+        String collectionsUrl = storeRoot.replaceAll("/+$", "") + COLLECTIONS_PATH;
+        if (!resolvedUrl.equalsIgnoreCase(collectionsUrl)) {
+            try {
+                page.navigate(collectionsUrl);
+                RandomDelayUtil.delay();
+                products = extractViaDomCards(page, storeRoot);
+            } catch (Exception e) {
+                log.warn("[SHOPIFY] DOM fallback failed for {}: {}", storeRoot, e.getMessage());
+            }
+        }
+
         log.info("[SHOPIFY] DOM scrape yielded {} products for {}", products.size(), storeRoot);
         return products;
     }
@@ -115,11 +138,29 @@ public class ShopifyParser {
         if (title.isBlank() || handle.isBlank()) return null;
 
         // Price — from first variant
-        double price = 0.0;
+        Double mainPrice = null;
+        Double discountedPrice = null;
         JsonNode variants = product.path("variants");
         if (variants.isArray() && variants.size() > 0) {
-            String priceStr = variants.get(0).path("price").asText("0");
-            try { price = Double.parseDouble(priceStr); } catch (NumberFormatException ignored) {}
+            JsonNode firstVariant = variants.get(0);
+            String priceStr = firstVariant.path("price").asText("0");
+            String compareAtPriceStr = firstVariant.path("compare_at_price").asText(null);
+            
+            double variantPrice = 0.0;
+            try { variantPrice = Double.parseDouble(priceStr); } catch (NumberFormatException ignored) {}
+            
+            double compareAtPrice = 0.0;
+            if (compareAtPriceStr != null && !compareAtPriceStr.isBlank() && !compareAtPriceStr.equals("null")) {
+                try { compareAtPrice = Double.parseDouble(compareAtPriceStr); } catch (NumberFormatException ignored) {}
+            }
+            
+            if (compareAtPrice > variantPrice) {
+                mainPrice = compareAtPrice;
+                discountedPrice = variantPrice;
+            } else {
+                mainPrice = variantPrice;
+                discountedPrice = null;
+            }
         }
 
         // Image
@@ -132,8 +173,8 @@ public class ShopifyParser {
         String productUrl = storeRoot.replaceAll("/+$", "") + "/products/" + handle;
 
         // Phase 3D Pre-filter (move to ScraperOrchestratorService but basic check here)
-        if (price > 0 && (price < 400 || price > 2000)) {
-            log.trace("[SHOPIFY] Pre-filtering by price: {} ({})", title, price);
+        if (mainPrice != null && mainPrice > 0 && (mainPrice < 300 || mainPrice > 5999)) {
+            log.trace("[SHOPIFY] Pre-filtering by price: {} ({})", title, mainPrice);
             // We allow it through if price is 0 (unknown) as per requirements
             // However, we can discard if price is clearly out of range here
             return null;
@@ -141,7 +182,8 @@ public class ShopifyParser {
 
         return RawProduct.builder()
                 .productName(title)
-                .price(price)
+                .mainPrice(mainPrice)
+                .discountedPrice(discountedPrice)
                 .imageUrl(imageUrl)
                 .productUrl(productUrl)
                 .build();
@@ -151,47 +193,38 @@ public class ShopifyParser {
     // STRATEGY 2 — DOM /collections/all
     // ─────────────────────────────────────────────────────────────
 
-    private List<RawProduct> extractViaDom(Page page, String storeRoot) {
+    private List<RawProduct> extractViaDomCards(Page page, String storeRoot) {
         List<RawProduct> results = new ArrayList<>();
-        String collectionsUrl = storeRoot.replaceAll("/+$", "") + COLLECTIONS_PATH;
 
-        try {
-            page.navigate(collectionsUrl);
-            RandomDelayUtil.delay();
+        // Shopify product card selectors (cover most themes)
+        List<String> cardSelectors = List.of(
+                ".product-card",
+                ".product-item",
+                ".grid-product",
+                "li.grid__item",
+                "div[class*='product']",
+                "article[class*='product']"
+        );
 
-            // Shopify product card selectors (cover most themes)
-            List<String> cardSelectors = List.of(
-                    ".product-card",
-                    ".product-item",
-                    ".grid-product",
-                    "li.grid__item",
-                    "div[class*='product']",
-                    "article[class*='product']"
-            );
-
-            List<ElementHandle> cards = new ArrayList<>();
-            for (String sel : cardSelectors) {
-                try {
-                    List<ElementHandle> found = page.querySelectorAll(sel);
-                    if (!found.isEmpty()) {
-                        cards = found;
-                        log.debug("[SHOPIFY] DOM: using selector '{}' → {} cards", sel, found.size());
-                        break;
-                    }
-                } catch (Exception ignored) {}
-            }
-
-            for (ElementHandle card : cards) {
-                try {
-                    RawProduct rp = parseDomCard(card, storeRoot);
-                    if (rp != null) results.add(rp);
-                } catch (Exception e) {
-                    log.trace("[SHOPIFY] DOM card parse failed: {}", e.getMessage());
+        List<ElementHandle> cards = new ArrayList<>();
+        for (String sel : cardSelectors) {
+            try {
+                List<ElementHandle> found = page.querySelectorAll(sel);
+                if (!found.isEmpty() && found.size() >= 2) {
+                    cards = found;
+                    log.debug("[SHOPIFY] DOM: using selector '{}' → {} cards", sel, found.size());
+                    break;
                 }
-            }
+            } catch (Exception ignored) {}
+        }
 
-        } catch (Exception e) {
-            log.warn("[SHOPIFY] DOM fallback failed for {}: {}", storeRoot, e.getMessage());
+        for (ElementHandle card : cards) {
+            try {
+                RawProduct rp = parseDomCard(card, storeRoot);
+                if (rp != null) results.add(rp);
+            } catch (Exception e) {
+                log.trace("[SHOPIFY] DOM card parse failed: {}", e.getMessage());
+            }
         }
 
         return results;
@@ -212,20 +245,41 @@ public class ShopifyParser {
         }
         if (title == null || title.isBlank()) return null;
 
-        // Price
-        double price = 0.0;
-        for (String sel : List.of(".price", ".money", "[class*='price']", "span[data-price]")) {
-            try {
-                ElementHandle el = card.querySelector(sel);
-                if (el != null) {
-                    String raw = el.innerText().replaceAll("[^0-9.]", "");
-                    if (!raw.isBlank()) { price = Double.parseDouble(raw); break; }
-                }
-            } catch (Exception ignored) {}
+        // Price extraction
+        Double mainPrice = null;
+        Double discountedPrice = null;
+        
+        // 1. Try to find explicit sale + regular prices
+        try {
+            ElementHandle regularEl = card.querySelector("s.price-item--regular, del .amount, .price__regular s");
+            ElementHandle saleEl = card.querySelector("span.price-item--sale, ins .amount, .price__sale .price-item");
+            
+            if (regularEl != null && saleEl != null) {
+                String regRaw = regularEl.innerText().replaceAll("[^0-9.]", "");
+                String saleRaw = saleEl.innerText().replaceAll("[^0-9.]", "");
+                if (!regRaw.isBlank()) mainPrice = Double.parseDouble(regRaw);
+                if (!saleRaw.isBlank()) discountedPrice = Double.parseDouble(saleRaw);
+            }
+        } catch (Exception ignored) {}
+        
+        // 2. If no explicit sale price structure found, grab the generic exact price
+        if (mainPrice == null && discountedPrice == null) {
+            for (String sel : List.of(".price", ".money", "[class*='price']", "span[data-price]")) {
+                try {
+                    ElementHandle el = card.querySelector(sel);
+                    if (el != null) {
+                        String raw = el.innerText().replaceAll("[^0-9.]", "");
+                        if (!raw.isBlank()) { 
+                            mainPrice = Double.parseDouble(raw); 
+                            break; 
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
         }
         
         // Pre-filter by price
-        if (price > 0 && (price < 400 || price > 2000)) return null;
+        if (mainPrice != null && mainPrice > 0 && (mainPrice < 300 || mainPrice > 5999)) return null;
 
         // Image
         String imageUrl = null;
@@ -253,7 +307,8 @@ public class ShopifyParser {
 
         return RawProduct.builder()
                 .productName(title)
-                .price(price)
+                .mainPrice(mainPrice)
+                .discountedPrice(discountedPrice)
                 .imageUrl(imageUrl)
                 .productUrl(productUrl)
                 .build();

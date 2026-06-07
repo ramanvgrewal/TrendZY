@@ -23,10 +23,11 @@ public class TrendController {
     public ApiResponse<Page<TrendResponse>> getTrends(
             @RequestParam(name = "tier", required = false) String tier,
             @RequestParam(name = "vibe", required = false, defaultValue = "All") String vibe,
+            @RequestParam(name = "indiaRelevant", required = false) Boolean indiaRelevant,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size) {
 
-        Page<TrendResponse> trends = trendService.getTrends(tier, vibe, PageRequest.of(page, size));
+        Page<TrendResponse> trends = trendService.getTrends(tier, vibe, indiaRelevant, PageRequest.of(page, size));
         return ApiResponse.<Page<TrendResponse>>builder()
                 .success(true)
                 .data(trends)

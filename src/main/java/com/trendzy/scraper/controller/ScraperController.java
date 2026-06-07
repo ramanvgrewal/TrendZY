@@ -54,11 +54,15 @@ public class ScraperController {
      */
     @GetMapping("/discover-products")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<List<ProductDto>>> discoverProducts() {
-        log.info("[CTRL] POST /api/scraper/discover-products — starting pipeline");
+    public ResponseEntity<ApiResponse<List<ProductDto>>> discoverProducts(
+            @RequestParam(required = false) String section,
+            @RequestParam(required = false) String category) {
+        
+        String targetSection = section != null ? section : (category != null ? category : "STREETWEAR");
+        log.info("[CTRL] POST /api/scraper/discover-products — starting pipeline for section: {}", targetSection);
         long startMs = System.currentTimeMillis();
 
-        List<ProductDto> products = orchestratorService.discoverProducts();
+        List<ProductDto> products = orchestratorService.discoverProducts(targetSection);
 
         long elapsedSec = (System.currentTimeMillis() - startMs) / 1000;
         String message  = products.isEmpty()

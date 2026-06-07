@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { fetchRisingTrends, isBackendOffline } from '../api/client';
 import TrendCard from '../components/TrendCard';
-import SkeletonCard from '../components/SkeletonCard';
+import SkeletonCard from '../components/ui/SkeletonCard';
 
 export default function RisingPage() {
     const { searchTerm } = useOutletContext();

@@ -111,7 +111,7 @@ public class WebsiteClient {
 
             // ── Extraction ────────────────────────────────────
             if (isShopify) {
-                products = shopifyParser.extractProducts(page, extractBaseUrl(resolvedUrl));
+                products = shopifyParser.extractProducts(page, extractBaseUrl(resolvedUrl), resolvedUrl);
             } else {
                 products = genericParser.extractProducts(page, extractBaseUrl(resolvedUrl));
             }

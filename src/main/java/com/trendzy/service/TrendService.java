@@ -38,28 +38,40 @@ public class TrendService {
     // GET PAGINATED TRENDS
     // ─────────────────────────────────────────────────────────────
 
-    public Page<TrendResponse> getTrends(String tier, String vibeTag, Pageable pageable) {
+    public Page<TrendResponse> getTrends(String tier, String vibeTag, Boolean indiaRelevant, Pageable pageable) {
         boolean hasTier = tier != null && !tier.isBlank();
         boolean hasVibe = vibeTag != null && !vibeTag.isBlank()
                 && !vibeTag.equalsIgnoreCase("All");
+        boolean hasIndia = indiaRelevant != null;
 
-        log.info("[TREND] getTrends — tier: {}, vibe: {}, page: {}",
+        log.info("[TREND] getTrends — tier: {}, vibe: {}, indiaRelevant: {}, page: {}",
                 hasTier ? tier : "ALL",
                 hasVibe ? vibeTag : "ALL",
+                hasIndia ? indiaRelevant : "ALL",
                 pageable.getPageNumber());
 
         Page<Trend> trends;
 
-        if (hasTier && hasVibe) {
-            trends = trendRepository
-                    .findByTierAndVibeTagAndActiveTrue(tier, vibeTag, pageable);
-        } else if (hasTier) {
-            trends = trendRepository.findByTierAndActiveTrue(tier, pageable);
-        } else if (hasVibe) {
-            trends = trendRepository.findByVibeTagAndActiveTrue(vibeTag, pageable);
+        if (hasIndia) {
+            if (hasTier && hasVibe) {
+                trends = trendRepository.findByTierAndVibeTagAndIndiaRelevantAndActiveTrue(tier, vibeTag, indiaRelevant, pageable);
+            } else if (hasTier) {
+                trends = trendRepository.findByTierAndIndiaRelevantAndActiveTrue(tier, indiaRelevant, pageable);
+            } else if (hasVibe) {
+                trends = trendRepository.findByVibeTagAndIndiaRelevantAndActiveTrue(vibeTag, indiaRelevant, pageable);
+            } else {
+                trends = trendRepository.findByIndiaRelevantAndActiveTrue(indiaRelevant, pageable);
+            }
         } else {
-            // findAll with active filter — never return inactive
-            trends = trendRepository.findByActiveTrue(pageable);
+            if (hasTier && hasVibe) {
+                trends = trendRepository.findByTierAndVibeTagAndActiveTrue(tier, vibeTag, pageable);
+            } else if (hasTier) {
+                trends = trendRepository.findByTierAndActiveTrue(tier, pageable);
+            } else if (hasVibe) {
+                trends = trendRepository.findByVibeTagAndActiveTrue(vibeTag, pageable);
+            } else {
+                trends = trendRepository.findByActiveTrue(pageable);
+            }
         }
 
         log.info("[TREND] Found {} trends (total: {})",
@@ -191,16 +203,18 @@ public class TrendService {
 
         long trendingCount = trendRepository.countByTier("trending");
         long risingCount   = trendRepository.countByTier("rising");
+        long indiaRelevantCount = trendRepository.countByIndiaRelevantTrueAndActiveTrue();
 
         var tokenUsage = tokenBudgetService.getTodayUsage();
 
-        log.info("[TREND] Stats — signalsToday: {}, trending: {}, rising: {}, subreddits: {}",
-                signalsToday, trendingCount, risingCount, subredditCount);
+        log.info("[TREND] Stats — signalsToday: {}, trending: {}, rising: {}, indiaRelevant: {}, subreddits: {}",
+                signalsToday, trendingCount, risingCount, indiaRelevantCount, subredditCount);
 
         return TrendStatsResponse.builder()
                 .signalsToday(signalsToday)
                 .trendingCount(trendingCount)
                 .risingCount(risingCount)
+                .indiaRelevantCount(indiaRelevantCount)
                 .subredditsMonitored(subredditCount)
                 .lastCollectionTime(LocalDateTime.now())
                 .groqTokensUsedToday(tokenUsage.getTokensUsed())
@@ -252,6 +266,7 @@ public class TrendService {
                 .aiSummary(trend.getAiSummary())
                 .whyTrending(trend.getWhyTrending())
                 .indiaRelevanceNote(trend.getIndiaRelevanceNote())
+                .indiaRelevant(trend.isIndiaRelevant())
                 .totalSignals(trend.getTotalSignals())
                 .detectedSubreddits(trend.getDetectedSubreddits())
                 .youtubeVideoCount(trend.getYoutubeVideoCount())
