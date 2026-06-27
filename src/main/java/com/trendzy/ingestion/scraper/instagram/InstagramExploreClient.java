@@ -19,22 +19,22 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Scrapes Instagram's Explore / hashtag pages for trend signals.
+ * Scrapes Instagram Explore / hashtag pages for trend signals.
  *
- * <h3>V1 (legacy) — {@link #fetchExplorePosts(Playwright, String)}</h3>
- * <p>Returns a list of post/reel URLs only. Used by the old product-discovery pipeline
- * ({@code ScraperOrchestratorService}). <strong>Kept intact — do not modify.</strong></p>
+ * <p><strong>0-Signal root cause and fix:</strong> Instagram obfuscates the
+ * visual DOM on post pages, making CSS-selector-based extraction unreliable.
+ * The real data lives in massive JSON blobs inside {@code <script>} tags.
+ * The previous extraction methods attempted to match any {@code "text":"..."}
+ * key in the full HTML string — a pattern too generic to survive Instagram's
+ * frequent JSON-schema reshuffles.
  *
- * <h3>V2 — {@link #fetchExploreSignals(Playwright, String)}</h3>
- * <p>Returns fully-populated {@link TrendSignal} objects with caption text, hashtags,
- * engagement scores, author username, and media URL. This is the new entry point for
- * the TrendZY V2 ingestion pipeline.</p>
- *
- * <h4>V2 Optimisation: Network Interception</h4>
- * <p>When navigating to individual post pages (to extract metadata that is not available
- * in the tag-page grid), the Playwright context intercepts and <strong>aborts</strong>
- * requests for images, fonts, stylesheets, and media files. This reduces page-load time
- * by ~60-70% since we only need the DOM text and embedded JSON payloads.</p>
+ * <p>All three extraction methods ({@code extractCaption}, {@code extractLikeCount},
+ * {@code extractCommentCount}) now use a <em>window-based</em> strategy: they
+ * first locate a known, stable JSON key marker ({@code edge_media_to_caption},
+ * {@code edge_media_preview_like}, {@code edge_media_to_comment}) via
+ * {@link String#indexOf}, then apply a targeted regex to a small substring
+ * window around that marker.  This avoids catastrophic backtracking on
+ * multi-MB page blobs and is resilient to surrounding key-order changes.
  */
 @Component
 @Slf4j
@@ -43,274 +43,219 @@ public class InstagramExploreClient {
 
     private final InstagramSessionManager sessionManager;
 
-    // ─────────────────────────────────────────────────────────────
-    // CONSTANTS
-    // ─────────────────────────────────────────────────────────────
-
-    private static final String EXPLORE_URL        = "https://www.instagram.com/explore/";
-    private static final String SEARCH_URL_TMPL    = "https://www.instagram.com/explore/tags/%s/";
-    private static final String USER_AGENT         =
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
-                    "AppleWebKit/537.36 (KHTML, like Gecko) " +
-                    "Chrome/120.0.0.0 Safari/537.36";
-    private static final int    SCROLL_COUNT       = 6;
-    private static final int    MAX_POSTS          = 30;
-    private static final int    DOM_SETTLE_TIMEOUT = 10_000;
-    private static final int    POST_PAGE_TIMEOUT  = 8_000;
-
-    /** Hashtag searches in specific order as per Phase 1. */
-    private static final Map<String, List<String>> SECTION_TAGS = Map.of(
-            "STREETWEAR", List.of("streetwearindia", "indianstreetwear", "d2cbrand", "oversizedtshirt", "y2kfashionindia", "genzfashion", "indiad2c", "newdrop", "brandedclothing"),
-            "CRICKET", List.of("cricketindia", "indiancricket", "cricketmerch", "bleedblue", "cricketfans", "iplmerch", "cricketapparel", "cricketjersey"),
-            "GYM", List.of("gymwearindia", "activewearindia", "fitnessapparel", "gymgear", "workoutclothes", "gymfashion", "athleisureindia", "indianfitness"),
-            "ANIME", List.of("animeclothingindia", "animemerchindia", "otakufashion", "animeapparel", "animestreetwear", "weebmerch", "animeindia", "mangaapparel"),
-            "SNEAKERS", List.of("sneakerheadindia", "sneakersindia", "kicksindia", "sneakerstore", "solecollectorindia", "streetwearsneakers", "sneakercommunityindia"),
-            "CODING", List.of("devmerch", "codingtshirts", "programmerclothing", "techapparel", "developersindia", "softwareengineer", "codinglife", "techmerch")
-    );
+    // ── Config ──────────────────────────────────────────────────────────────
+    private static final String EXPLORE_URL       = "https://www.instagram.com/explore/";
+    private static final String SEARCH_URL_TMPL   = "https://www.instagram.com/explore/tags/%s/";
+    private static final String USER_AGENT        =
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
+                    "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+    private static final int SCROLL_COUNT         = 6;
+    private static final int MAX_POSTS            = 30;
+    private static final int DOM_SETTLE_TIMEOUT   = 10_000;
+    private static final int POST_PAGE_TIMEOUT    = 8_000;
     private static final int SCROLL_COUNT_PER_TAG = 2;
     private static final int POSTS_PER_TAG        = 8;
     private static final int MIN_POSTS_TOTAL      = 30;
 
+    // ── Section → Tag Mapping ────────────────────────────────────────────────
+    private static final Map<String, List<String>> SECTION_TAGS = Map.of(
+            "STREETWEAR", List.of("streetwearindia", "indianstreetwear", "d2cbrand", "oversizedtshirt",
+                    "y2kfashionindia", "genzfashion", "indiad2c", "newdrop", "brandedclothing"),
+            "CRICKET",    List.of("cricketindia", "indiancricket", "cricketmerch", "bleedblue",
+                    "cricketfans", "iplmerch", "cricketapparel", "cricketjersey"),
+            "GYM",        List.of("gymwearindia", "activewearindia", "fitnessapparel", "gymgear",
+                    "workoutclothes", "gymfashion", "athleisureindia", "indianfitness"),
+            "ANIME",      List.of("animeclothingindia", "animemerchindia", "otakufashion", "animeapparel",
+                    "animestreetwear", "weebmerch", "animeindia", "mangaapparel"),
+            "SNEAKERS",   List.of("sneakerheadindia", "sneakersindia", "kicksindia", "sneakerstore",
+                    "solecollectorindia", "streetwearsneakers", "sneakercommunityindia"),
+            "CODING",     List.of("devmerch", "codingtshirts", "programmerclothing", "techapparel",
+                    "developersindia", "softwareengineer", "codinglife", "techmerch")
+    );
+
+    // ── URL Patterns ─────────────────────────────────────────────────────────
     private static final Pattern POST_OR_REEL_PATTERN =
             Pattern.compile("https://www\\.instagram\\.com/(p|reel)/[A-Za-z0-9_-]+/?");
 
-    // ── Patterns for extracting post metadata from Instagram's embedded JSON ──
+    // ── Caption Extraction Patterns ──────────────────────────────────────────
+    /**
+     * Applied to a ~5000-char window starting at the {@code edge_media_to_caption}
+     * marker.  Matches the {@code "text":"..."} node within the caption edges array.
+     * A 5000-char window comfortably covers Instagram's 2200-char caption limit
+     * plus JSON structural overhead.
+     */
+    private static final Pattern CAPTION_TEXT_IN_WINDOW =
+            Pattern.compile("\"text\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)+)\"");
 
-    /** Matches the caption / "text" field in Instagram's embedded JSON. */
-    private static final Pattern CAPTION_JSON_PATTERN = Pattern.compile(
-            "\"text\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"");
+    /**
+     * Applied to a ~600-char window starting at {@code "caption":\{} for the
+     * newer GraphQL API response schema: {@code "caption": {"text": "..." }}.
+     */
+    private static final Pattern CAPTION_OBJECT_PATTERN = Pattern.compile(
+            "\"caption\"\\s*:\\s*\\{[^{}]{0,300}?\"text\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)+)\"");
 
-    /** Matches an og:description meta tag (fallback for caption). */
-    private static final Pattern OG_DESC_PATTERN = Pattern.compile(
-            "<meta\\s+(?:property|name)\\s*=\\s*\"og:description\"\\s+content\\s*=\\s*\"((?:[^\"\\\\]|\\\\.)*)\"",
-            Pattern.CASE_INSENSITIVE);
+    // ── Like & Comment Count Patterns ────────────────────────────────────────
+    /**
+     * Fallback direct-field pattern for like count — scanned across the full HTML
+     * and the maximum value is used, to handle repeated occurrences.
+     */
+    private static final Pattern LIKE_COUNT_DIRECT =
+            Pattern.compile("\"like_count\"\\s*:\\s*(\\d+)");
 
-    /** Matches like_count or edge_media_preview_like count in embedded JSON. */
-    private static final Pattern LIKE_COUNT_PATTERN = Pattern.compile(
-            "\"(?:like_count|edge_media_preview_like)\"\\s*[:{]\\s*(?:\"count\"\\s*:\\s*)?(\\d+)");
+    /**
+     * Fallback direct-field pattern for comment count.
+     */
+    private static final Pattern COMMENT_COUNT_DIRECT =
+            Pattern.compile("\"comment_count\"\\s*:\\s*(\\d+)");
 
-    /** Matches the owner username in embedded JSON. */
+    // ── Author Extraction Patterns ────────────────────────────────────────────
+    /** JSON-LD Schema.org: {@code "author": \{"alternateName": "@username"\}} */
+    private static final Pattern JSON_LD_AUTHOR_PATTERN = Pattern.compile(
+            "\"author\"\\s*:\\s*\\{[^}]*\"alternateName\"\\s*:\\s*\"@([A-Za-z0-9._]+)\"");
+
+    /** Embedded JSON owner block: {@code "owner": \{"username": "..."\}} */
     private static final Pattern OWNER_USERNAME_PATTERN = Pattern.compile(
             "\"owner\"\\s*:\\s*\\{[^}]*\"username\"\\s*:\\s*\"([A-Za-z0-9._]+)\"");
 
-    /** Matches og:image meta tag for the media URL. */
     private static final Pattern OG_IMAGE_PATTERN = Pattern.compile(
-            "<meta\\s+(?:property|name)\\s*=\\s*\"og:image\"\\s+content\\s*=\\s*\"((?:[^\"\\\\]|\\\\.)*)\"",
+            "<meta[^>]+property\\s*=\\s*\"og:image\"[^>]+content\\s*=\\s*\"([^\"\\\\]*(?:\\\\.[^\"\\\\]*)*)\"",
             Pattern.CASE_INSENSITIVE);
 
-    /** Extracts hashtags from caption text. */
     private static final Pattern HASHTAG_PATTERN = Pattern.compile("#([A-Za-z0-9_]+)");
 
-    /** Resource types to block when scraping individual post pages. */
-    private static final Set<String> BLOCKED_RESOURCE_TYPES = Set.of(
-            "image", "media", "font", "stylesheet"
-    );
+    private static final Set<String> BLOCKED_RESOURCE_TYPES =
+            Set.of("image", "media", "font", "stylesheet");
 
-    /** Reserved Instagram paths — not usernames. */
-    private static final List<String> RESERVED_PATHS = List.of(
-            "explore", "p", "reel", "stories", "accounts", "tags", "direct"
-    );
+    private static final List<String> RESERVED_PATHS =
+            List.of("explore", "p", "reel", "stories", "accounts", "tags", "direct");
 
-    // ═════════════════════════════════════════════════════════════
-    //  V1 — LEGACY: fetchExplorePosts (returns URLs only)
-    //  ⚠ DO NOT MODIFY — used by ScraperOrchestratorService
-    // ═════════════════════════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════════════
+    //  V1 — LEGACY: fetchExplorePosts (URL collection only, kept for compat)
+    // ════════════════════════════════════════════════════════════════════════
 
-    /**
-     * Returns a de-duplicated list of Instagram post URLs found on specific hashtag pages.
-     * Follows Phase 1 instructions.
-     *
-     * @param playwright a live {@link Playwright} instance owned by the caller
-     * @param section the specific section corresponding to hashtags to scrape
-     */
     public List<String> fetchExplorePosts(Playwright playwright, String section) {
         Set<String> postUrls = new LinkedHashSet<>();
-
         if (!sessionManager.ensureSession(playwright)) {
-            log.warn("[EXPLORE] Cannot proceed — no valid session");
-            return List.of();
+            log.warn("[EXPLORE] No valid session"); return List.of();
         }
-
-        BrowserType.LaunchOptions launchOpts = new BrowserType.LaunchOptions().setHeadless(true);
-
-        try (Browser browser = playwright.chromium().launch(launchOpts)) {
-            BrowserContext context = createContext(browser);
-            Page page = context.newPage();
-
-            // ── Phase 1: Hashtag Discovery ─────────────────
-            List<String> currentTags = SECTION_TAGS.getOrDefault(section == null ? "" : section.toUpperCase(), SECTION_TAGS.get("STREETWEAR"));
-            for (String tag : currentTags) {
+        try (Browser browser = playwright.chromium()
+                .launch(new BrowserType.LaunchOptions().setHeadless(true))) {
+            BrowserContext ctx = createContext(browser);
+            Page page = ctx.newPage();
+            for (String tag : SECTION_TAGS.getOrDefault(
+                    section == null ? "" : section.toUpperCase(), SECTION_TAGS.get("STREETWEAR"))) {
                 if (postUrls.size() >= MIN_POSTS_TOTAL) break;
-                String tagUrl = String.format(SEARCH_URL_TMPL, tag);
-                collectFromTagUrl(page, tagUrl, postUrls);
+                collectFromTagUrl(page, String.format(SEARCH_URL_TMPL, tag), postUrls);
                 RandomDelayUtil.delay();
             }
-
-            context.close();
-
+            ctx.close();
         } catch (Exception e) {
-            log.error("[EXPLORE] Fatal error: {}", e.getMessage(), e);
+            log.error("[EXPLORE] Fatal: {}", e.getMessage(), e);
         }
-
         List<String> result = new ArrayList<>(postUrls);
         log.info("[EXPLORE] Returning {} post URLs", result.size());
         return result;
     }
 
-    // ═════════════════════════════════════════════════════════════
-    //  V2 — NEW: fetchExploreSignals (returns TrendSignal objects)
-    // ═════════════════════════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════════════
+    //  V2 — fetchExploreSignals
+    // ════════════════════════════════════════════════════════════════════════
 
-    /**
-     * Scrapes Instagram hashtag pages and then navigates into each individual post
-     * to extract rich signal data: caption, hashtags, engagement score, author, and media URL.
-     *
-     * <p><strong>Performance optimisation:</strong> Network interception aborts all image,
-     * font, stylesheet, and media requests when loading individual post pages, since
-     * we only need DOM text and embedded JSON payloads.</p>
-     *
-     * @param playwright a live {@link Playwright} instance owned by the caller
-     * @param section    the section/category determining which hashtags to scrape
-     * @return list of {@link TrendSignal} objects with {@code platform = INSTAGRAM}
-     */
     public List<TrendSignal> fetchExploreSignals(Playwright playwright, String section) {
-        log.info("[EXPLORE-V2] ════════ Starting signal extraction for section: {} ════════", section);
-
+        log.info("[EXPLORE-V2] ════════ Starting signal extraction — section={} ════════", section);
         List<TrendSignal> signals = new ArrayList<>();
 
         if (!sessionManager.ensureSession(playwright)) {
-            log.warn("[EXPLORE-V2] Cannot proceed — no valid Instagram session");
-            return signals;
+            log.warn("[EXPLORE-V2] No valid Instagram session"); return signals;
         }
 
-        BrowserType.LaunchOptions launchOpts = new BrowserType.LaunchOptions().setHeadless(true);
-
         Set<String> postUrls = null;
-        try (Browser browser = playwright.chromium().launch(launchOpts)) {
-            BrowserContext context = createContext(browser);
-
-            // ── Phase 1: Collect post URLs from hashtag pages ──────────
-            // (reuses existing tag-page scrolling logic; no resource blocking here
-            //  because the tag page grid needs images to fully render the DOM)
+        try (Browser browser = playwright.chromium()
+                .launch(new BrowserType.LaunchOptions().setHeadless(true))) {
+            BrowserContext ctx = createContext(browser);
             postUrls = new LinkedHashSet<>();
-            Page tagPage = context.newPage();
+            Page tagPage = ctx.newPage();
 
-            List<String> currentTags = SECTION_TAGS.getOrDefault(
-                    section == null ? "" : section.toUpperCase(),
-                    SECTION_TAGS.get("STREETWEAR"));
-
-            for (String tag : currentTags) {
+            List<String> tags = SECTION_TAGS.getOrDefault(
+                    section == null ? "" : section.toUpperCase(), SECTION_TAGS.get("STREETWEAR"));
+            for (String tag : tags) {
                 if (postUrls.size() >= MIN_POSTS_TOTAL) break;
-                String tagUrl = String.format(SEARCH_URL_TMPL, tag);
-                collectFromTagUrl(tagPage, tagUrl, postUrls);
+                collectFromTagUrl(tagPage, String.format(SEARCH_URL_TMPL, tag), postUrls);
                 RandomDelayUtil.delay();
             }
-
             tagPage.close();
-            log.info("[EXPLORE-V2] Phase 1 complete — collected {} post URLs from tag pages", postUrls.size());
+            log.info("[EXPLORE-V2] Phase 1 done — {} post URLs collected", postUrls.size());
 
             if (postUrls.isEmpty()) {
-                log.warn("[EXPLORE-V2] No post URLs found — returning empty signal list");
-                context.close();
+                log.warn("[EXPLORE-V2] No post URLs found — aborting");
+                ctx.close();
                 return signals;
             }
 
-            // ── Phase 2: Navigate into each post to extract signal data ──
-            // Open a NEW page with resource interception enabled for speed
-            Page signalPage = context.newPage();
+            Page signalPage = ctx.newPage();
             installResourceBlocker(signalPage);
 
-            int processed = 0;
-            int totalPosts = postUrls.size();
-
+            int processed = 0, total = postUrls.size();
             for (String postUrl : postUrls) {
                 processed++;
-                log.info("[EXPLORE-V2] Extracting signal {}/{}: {}", processed, totalPosts, postUrl);
-
+                log.info("[EXPLORE-V2] Extracting signal {}/{}: {}", processed, total, postUrl);
                 try {
                     TrendSignal signal = extractSignalFromPost(signalPage, postUrl);
                     if (signal != null) {
                         signals.add(signal);
-                        log.info("[EXPLORE-V2] ✅ Signal extracted — @{} | likes={} | hashtags={} | caption={}",
-                                signal.getAuthorUsername(),
-                                signal.getEngagementScore(),
-                                signal.getHashtags().size(),
+                        log.info("[EXPLORE-V2] ✅ @{} | likes={} | comments={} | tags={} | caption={}",
+                                signal.getAuthorUsername(), signal.getEngagementScore(),
+                                signal.getCommentCount(), signal.getHashtags().size(),
                                 truncate(signal.getRawText(), 80));
                     } else {
-                        log.debug("[EXPLORE-V2] ⚠ Could not extract signal from: {}", postUrl);
+                        log.debug("[EXPLORE-V2] ⚠ No signal extracted from: {}", postUrl);
                     }
                 } catch (TimeoutError te) {
-                    log.warn("[EXPLORE-V2] Timeout loading post page — skipping: {}", postUrl);
+                    log.warn("[EXPLORE-V2] Timeout — skipping: {}", postUrl);
                 } catch (Exception e) {
-                    log.warn("[EXPLORE-V2] Error extracting signal from {}: {}", postUrl, e.getMessage());
+                    log.warn("[EXPLORE-V2] Error on {}: {}", postUrl, e.getMessage());
                 }
-
-                // Anti-detection delay between post navigations
                 RandomDelayUtil.shortDelay();
-
-                // Extended pause every 10 posts to avoid rate limiting
-                if (processed % 10 == 0 && processed < totalPosts) {
-                    log.info("[EXPLORE-V2] Processed {} posts — pausing to avoid rate limiting", processed);
+                if (processed % 10 == 0 && processed < total)
                     RandomDelayUtil.delay(8_000, 12_000, "v2-rate-limit-pause");
-                }
             }
-
             signalPage.close();
-            context.close();
-
+            ctx.close();
         } catch (Exception e) {
-            log.error("[EXPLORE-V2] Fatal error during signal extraction: {}", e.getMessage(), e);
+            log.error("[EXPLORE-V2] Fatal: {}", e.getMessage(), e);
         }
 
         assert postUrls != null;
-        log.info("[EXPLORE-V2] ════════ Signal extraction complete: {} signals from {} posts ════════",
+        log.info("[EXPLORE-V2] ════════ Done: {} signals from {} posts ════════",
                 signals.size(), postUrls.size());
         return signals;
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  V2 INTERNALS — Signal Extraction from Individual Post Page
-    // ─────────────────────────────────────────────────────────────
+    // ════════════════════════════════════════════════════════════════════════
+    //  SIGNAL EXTRACTION — INDIVIDUAL POST PAGE
+    // ════════════════════════════════════════════════════════════════════════
 
-    /**
-     * Navigates to an individual Instagram post page and extracts all available
-     * signal data from the DOM and embedded JSON.
-     *
-     * <p>Extraction priority for each field:
-     * <ul>
-     *   <li><strong>Caption:</strong> embedded JSON {@code "text":"..."} → {@code og:description} meta tag</li>
-     *   <li><strong>Likes:</strong> JSON {@code "like_count":N} or {@code "edge_media_preview_like":{"count":N}}</li>
-     *   <li><strong>Author:</strong> JSON {@code "owner":{"username":"..."}}</li>
-     *   <li><strong>Media URL:</strong> {@code og:image} meta tag</li>
-     *   <li><strong>Hashtags:</strong> parsed from caption text via {@code #(\w+)} regex</li>
-     * </ul>
-     *
-     * @param page    a Playwright page with resource blocking already installed
-     * @param postUrl the full Instagram post or reel URL
-     * @return a populated {@link TrendSignal}, or {@code null} if extraction failed completely
-     */
     private TrendSignal extractSignalFromPost(Page page, String postUrl) {
-        page.navigate(postUrl, new Page.NavigateOptions().setTimeout(POST_PAGE_TIMEOUT));
-
+        // ── Navigate ──────────────────────────────────────────────────────────
         try {
-            page.waitForLoadState(
-                    LoadState.DOMCONTENTLOADED,
-                    new Page.WaitForLoadStateOptions().setTimeout(POST_PAGE_TIMEOUT));
+            page.navigate(postUrl, new Page.NavigateOptions().setTimeout(POST_PAGE_TIMEOUT));
         } catch (TimeoutError te) {
-            log.debug("[EXPLORE-V2] DOM content timeout for post — continuing with partial data: {}", postUrl);
+            log.warn("[EXPLORE-V2] Navigation timeout for: {}", postUrl);
         }
+        try {
+            page.waitForLoadState(LoadState.DOMCONTENTLOADED,
+                    new Page.WaitForLoadStateOptions().setTimeout(POST_PAGE_TIMEOUT));
+        } catch (TimeoutError ignored) {}
 
-        // Check for session expiry (redirect to login page)
         if (isLoginPage(page.url())) {
-            log.warn("[EXPLORE-V2] Session expired — redirected to login page");
+            log.warn("[EXPLORE-V2] Session expired — login redirect detected");
             sessionManager.invalidateSession();
             return null;
         }
 
-        // Small settle delay for any remaining JS to hydrate the embedded JSON
-        RandomDelayUtil.delay(500, 1000, "post-settle");
+        RandomDelayUtil.delay(500, 1500, "post-settle");
 
-        // Get the full page HTML once — all extraction happens against this string
+        // ── Raw HTML ──────────────────────────────────────────────────────────
         String html;
         try {
             html = page.content();
@@ -320,28 +265,32 @@ public class InstagramExploreClient {
         }
 
         if (html == null || html.length() < 200) {
-            log.debug("[EXPLORE-V2] Page content too small — likely blocked: {}", postUrl);
+            log.warn("[EXPLORE-V2] Page suspiciously small ({} chars) for {}",
+                    html != null ? html.length() : 0, postUrl);
             return null;
         }
 
-        // ── Extract caption ──────────────────────────────────
-        String caption = extractCaption(html);
+        // ── Extract Fields ────────────────────────────────────────────────────
+        String caption      = extractCaption(html);
+        long   likeCount    = extractLikeCount(html);
+        long   commentCount = extractCommentCount(html);
+        String author       = extractAuthorUsername(html, page);
+        String mediaUrl     = extractMediaUrl(html);
 
-        // ── Extract hashtags from caption ─────────────────────
-        List<String> hashtags = extractHashtags(caption);
+        // ── Poison Guard ──────────────────────────────────────────────────────
+        if ("dekhoooooooo".equalsIgnoreCase(author)) {
+            log.warn("[EXPLORE-V2] ☠ Poison guard — discarding post from bot @dekhoooooooo: {}", postUrl);
+            return null;
+        }
 
-        // ── Extract engagement score (like count) ─────────────
-        long likeCount = extractLikeCount(html);
-
-        // ── Extract author username ───────────────────────────
-        String authorUsername = extractAuthorUsername(html);
-
-        // ── Extract media URL ─────────────────────────────────
-        String mediaUrl = extractMediaUrl(html);
-
-        // Validate: we need at least a caption OR a like count to call this a useful signal
-        if ((caption == null || caption.isBlank()) && likeCount == 0) {
-            log.debug("[EXPLORE-V2] No caption and no engagement — skipping: {}", postUrl);
+        // ── Discard Gate — with 500-char diagnostic snippet ───────────────────
+        // If we hit this after the extraction rewrite, the snippet exposes whether
+        // we are seeing a CAPTCHA wall, login modal, or a genuinely empty page.
+        if ((caption == null || caption.isBlank()) && likeCount == 0 && commentCount == 0) {
+            String snippet = html.substring(0, Math.min(html.length(), 500))
+                    .replaceAll("\\s+", " ");
+            log.warn("[EXPLORE-V2] ⚠ DISCARD — no caption/engagement for {}. " +
+                    "Page snippet (500 chars): [{}]", postUrl, snippet);
             return null;
         }
 
@@ -349,77 +298,395 @@ public class InstagramExploreClient {
                 .platform(Platform.INSTAGRAM)
                 .sourceUrl(postUrl)
                 .rawText(caption != null ? caption : "")
-                .hashtags(hashtags)
+                .hashtags(extractHashtags(caption))
                 .engagementScore(likeCount)
-                .authorUsername(authorUsername != null ? authorUsername : "unknown")
+                .commentCount(commentCount > 0 ? commentCount : null)
+                .authorUsername(author != null ? author : "unknown")
                 .mediaUrl(mediaUrl)
                 .collectedAt(Instant.now())
                 .processedByAi(false)
                 .build();
     }
 
+    // ════════════════════════════════════════════════════════════════════════
+    //  CAPTION EXTRACTION — 4-STRATEGY WINDOW-BASED
+    // ════════════════════════════════════════════════════════════════════════
+
     /**
-     * Extracts the post caption from Instagram's embedded JSON or og:description meta tag.
+     * Extracts the post caption via a 4-strategy waterfall that targets the raw
+     * JSON blobs embedded in Instagram's {@code <script>} tags rather than the
+     * obfuscated visual DOM.
      *
-     * <p><strong>Strategy:</strong> Instagram embeds post data as JSON in {@code <script>} tags.
-     * The caption is found in {@code "text":"..."} fields. We prefer the longest match
-     * (since the page may contain multiple "text" fields for comments, etc.)
-     * and fall back to the {@code og:description} meta tag.</p>
+     * <h3>Strategy summary</h3>
+     * <ol>
+     *   <li><b>edge_media_to_caption window</b> — canonical GraphQL caption path.
+     *       Scans ALL occurrences and returns the longest valid match to guard
+     *       against duplicate blobs with truncated content.</li>
+     *   <li><b>caption.text object window</b> — newer GraphQL API schema.</li>
+     *   <li><b>og:description</b> — attempts to strip the engagement prefix
+     *       ({@code "N likes, M comments - @user on Date: "}) before returning
+     *       the raw caption portion.</li>
+     *   <li><b>accessibility_caption</b> — Instagram's alt-text field used for
+     *       AI-generated image descriptions; often contains product context.</li>
+     * </ol>
      */
     private String extractCaption(String html) {
-        // Strategy 1: Find the longest "text":"..." value in embedded JSON
-        // This is typically the main caption (comments are shorter)
-        String bestCaption = null;
-        Matcher m = CAPTION_JSON_PATTERN.matcher(html);
-        while (m.find()) {
-            String candidate = unescapeJsonString(m.group(1));
-            // Filter out very short strings (likely not the caption) and Instagram UI text
-            if (candidate != null && candidate.length() > 5
-                    && !candidate.startsWith("Follow")
-                    && !candidate.startsWith("Log in")
-                    && !candidate.contains("Instagram")) {
-                if (bestCaption == null || candidate.length() > bestCaption.length()) {
-                    bestCaption = candidate;
+
+        // ── S1: edge_media_to_caption window ──────────────────────────────────
+        // JSON path: edge_media_to_caption → edges[0] → node → text
+        // We scan all occurrences and keep the longest valid caption to handle
+        // pages where the same blob appears more than once in different contexts.
+        {
+            String best = null;
+            int searchFrom = 0;
+            while (true) {
+                int markerIdx = html.indexOf("edge_media_to_caption", searchFrom);
+                if (markerIdx == -1) break;
+
+                String window = html.substring(markerIdx, Math.min(markerIdx + 5000, html.length()));
+                Matcher m = CAPTION_TEXT_IN_WINDOW.matcher(window);
+                if (m.find()) {
+                    String candidate = unescapeJsonString(m.group(1));
+                    if (isValidCaption(candidate) && (best == null || candidate.length() > best.length())) {
+                        best = candidate.trim();
+                    }
+                }
+                searchFrom = markerIdx + 21; // len("edge_media_to_caption")
+                if (searchFrom > 5_000_000) break; // safety on pathologically large pages
+            }
+            if (best != null) {
+                log.debug("[EXPLORE-V2] Caption via edge_media_to_caption ({} chars)", best.length());
+                return best;
+            }
+        }
+
+        // ── S2: "caption":{"text":"..."} — newer GraphQL schema ───────────────
+        {
+            int searchFrom = 0;
+            while (true) {
+                int markerIdx = html.indexOf("\"caption\":{", searchFrom);
+                if (markerIdx == -1) markerIdx = html.indexOf("\"caption\": {", searchFrom);
+                if (markerIdx == -1) break;
+
+                String window = html.substring(markerIdx, Math.min(markerIdx + 600, html.length()));
+                Matcher m = CAPTION_OBJECT_PATTERN.matcher(window);
+                if (m.find()) {
+                    String candidate = unescapeJsonString(m.group(1));
+                    if (isValidCaption(candidate)) {
+                        log.debug("[EXPLORE-V2] Caption via caption.text ({} chars)", candidate.length());
+                        return candidate.trim();
+                    }
+                }
+                searchFrom = markerIdx + 11;
+                if (searchFrom > 5_000_000) break;
+            }
+        }
+
+        // ── S3: og:description ────────────────────────────────────────────────
+        // Instagram format: "N likes, M comments - @user on Date: "caption""
+        // We first try to extract the portion inside the trailing quotes.
+        {
+            String ogDesc = extractOgContent(html, "og:description");
+            if (ogDesc != null) {
+                ogDesc = unescapeHtmlEntities(ogDesc);
+                // Try to strip the metadata prefix and extract the quoted caption
+                Matcher quotedM = Pattern.compile("\"(.{10,})\"\\s*$").matcher(ogDesc);
+                if (quotedM.find() && isValidCaption(quotedM.group(1))) {
+                    log.debug("[EXPLORE-V2] Caption via og:description[quoted] ({} chars)",
+                            quotedM.group(1).length());
+                    return quotedM.group(1).trim();
+                }
+                // Fall back to the full description string
+                if (isValidCaption(ogDesc) && ogDesc.length() > 20) {
+                    log.debug("[EXPLORE-V2] Caption via og:description[full] ({} chars)", ogDesc.length());
+                    return ogDesc.trim();
                 }
             }
         }
 
-        if (bestCaption != null && bestCaption.length() > 10) {
-            log.debug("[EXPLORE-V2] Caption via JSON 'text' field ({} chars)", bestCaption.length());
-            return bestCaption.trim();
-        }
-
-        // Strategy 2: og:description meta tag
-        Matcher ogMatcher = OG_DESC_PATTERN.matcher(html);
-        if (ogMatcher.find()) {
-            String ogDesc = unescapeHtmlEntities(ogMatcher.group(1));
-            if (ogDesc != null && ogDesc.length() > 10) {
-                log.debug("[EXPLORE-V2] Caption via og:description ({} chars)", ogDesc.length());
-                return ogDesc.trim();
+        // ── S4: accessibility_caption JSON field ─────────────────────────────
+        {
+            Matcher m = Pattern.compile(
+                    "\"accessibility_caption\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.){20,})\"").matcher(html);
+            if (m.find()) {
+                String candidate = unescapeJsonString(m.group(1));
+                if (isValidCaption(candidate)) {
+                    log.debug("[EXPLORE-V2] Caption via accessibility_caption ({} chars)", candidate.length());
+                    return candidate.trim();
+                }
             }
-        }
-
-        // Strategy 3: Try to extract from accessibility text on images
-        // Instagram sometimes has: alt="Photo by @user on ... Caption text here"
-        Matcher altMatcher = Pattern.compile("alt=\"Photo by[^\"]*?\\. ([^\"]{20,})\"").matcher(html);
-        if (altMatcher.find()) {
-            String altCaption = altMatcher.group(1);
-            log.debug("[EXPLORE-V2] Caption via img alt text ({} chars)", altCaption.length());
-            return altCaption.trim();
         }
 
         log.debug("[EXPLORE-V2] No caption found in page HTML");
         return null;
     }
 
+    // ════════════════════════════════════════════════════════════════════════
+    //  LIKE COUNT — WINDOW-BASED WITH DIRECT-SCAN FALLBACK
+    // ════════════════════════════════════════════════════════════════════════
+
     /**
-     * Extracts hashtags from the caption text.
-     * Returns tags WITHOUT the leading '#' symbol (e.g. "streetwear", not "#streetwear").
+     * <ol>
+     *   <li><b>Window strategy:</b> locates the {@code edge_media_preview_like}
+     *       marker, takes a 200-char window, and extracts the first
+     *       {@code "count":N} value.</li>
+     *   <li><b>Direct scan fallback:</b> scans all {@code "like_count":N}
+     *       occurrences and returns the maximum value.</li>
+     * </ol>
      */
+    private long extractLikeCount(String html) {
+        // S1: edge_media_preview_like window
+        int idx = html.indexOf("edge_media_preview_like");
+        if (idx != -1) {
+            String window = html.substring(idx, Math.min(idx + 200, html.length()));
+            Matcher m = Pattern.compile("\"count\"\\s*:\\s*(\\d+)").matcher(window);
+            if (m.find()) {
+                try {
+                    long count = Long.parseLong(m.group(1));
+                    log.debug("[EXPLORE-V2] Likes via edge_media_preview_like: {}", count);
+                    return count;
+                } catch (NumberFormatException ignored) {}
+            }
+        }
+
+        // S2: direct-field scan — take max across all occurrences
+        long max = 0;
+        Matcher m = LIKE_COUNT_DIRECT.matcher(html);
+        while (m.find()) {
+            try {
+                long n = Long.parseLong(m.group(1));
+                if (n > max) max = n;
+            } catch (NumberFormatException ignored) {}
+        }
+
+        if (max > 0) log.debug("[EXPLORE-V2] Likes via like_count direct: {}", max);
+        else         log.debug("[EXPLORE-V2] Could not extract like count");
+        return max;
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    //  COMMENT COUNT — WINDOW-BASED WITH DIRECT-SCAN FALLBACK
+    // ════════════════════════════════════════════════════════════════════════
+
+    /**
+     * <ol>
+     *   <li><b>Window strategy:</b> locates the {@code edge_media_to_comment}
+     *       marker, takes a 200-char window, and extracts the first
+     *       {@code "count":N} value.</li>
+     *   <li><b>Direct scan fallback:</b> scans all {@code "comment_count":N}
+     *       occurrences and returns the maximum value.</li>
+     * </ol>
+     */
+    private long extractCommentCount(String html) {
+        // S1: edge_media_to_comment window
+        int idx = html.indexOf("edge_media_to_comment");
+        if (idx != -1) {
+            String window = html.substring(idx, Math.min(idx + 200, html.length()));
+            Matcher m = Pattern.compile("\"count\"\\s*:\\s*(\\d+)").matcher(window);
+            if (m.find()) {
+                try {
+                    long count = Long.parseLong(m.group(1));
+                    log.debug("[EXPLORE-V2] Comments via edge_media_to_comment: {}", count);
+                    return count;
+                } catch (NumberFormatException ignored) {}
+            }
+        }
+
+        // S2: direct-field scan — take max
+        long max = 0;
+        Matcher m = COMMENT_COUNT_DIRECT.matcher(html);
+        while (m.find()) {
+            try {
+                long n = Long.parseLong(m.group(1));
+                if (n > max) max = n;
+            } catch (NumberFormatException ignored) {}
+        }
+
+        if (max > 0) log.debug("[EXPLORE-V2] Comments via comment_count direct: {}", max);
+        return max;
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    //  AUTHOR EXTRACTION — 7-STRATEGY WATERFALL WITH POISON GUARD
+    // ════════════════════════════════════════════════════════════════════════
+
+    /**
+     * Extracts the post author's username using 7 ordered strategies.
+     *
+     * <p><strong>Key fix:</strong> Earlier versions used {@code [^}]*} in regex patterns
+     * to match the owner/author JSON block. This breaks on nested objects (e.g.,
+     * {@code "owner":{"id":"123","edge_followed_by":{"count":100},"username":"target"}})
+     * because {@code [^}]*} stops at the first closing brace. The fix uses
+     * <strong>windowed extraction</strong>: find the JSON marker, take a bounded
+     * substring, and search for the username within that window.</p>
+     */
+    private String extractAuthorUsername(String html, Page page) {
+
+        // S1: Window-based "owner" JSON extraction (handles nested objects)
+        //     Find "owner" marker, take a 500-char window, search for "username":"..." within it
+        {
+            int idx = html.indexOf("\"owner\"");
+            if (idx == -1) idx = html.indexOf("\"owner\" ");
+            if (idx != -1) {
+                String window = html.substring(idx, Math.min(idx + 500, html.length()));
+                Matcher m = Pattern.compile("\"username\"\\s*:\\s*\"([A-Za-z0-9._]{2,30})\"").matcher(window);
+                if (m.find()) {
+                    String u = m.group(1);
+                    if (isValidAuthor(u)) {
+                        log.debug("[EXPLORE-V2] Author via owner-window: @{}", u);
+                        return u;
+                    }
+                }
+            }
+        }
+
+        // S2: Window-based "user" JSON extraction (alternate API schema)
+        {
+            int idx = html.indexOf("\"user\":{");
+            if (idx == -1) idx = html.indexOf("\"user\" :{");
+            if (idx != -1) {
+                String window = html.substring(idx, Math.min(idx + 500, html.length()));
+                Matcher m = Pattern.compile("\"username\"\\s*:\\s*\"([A-Za-z0-9._]{2,30})\"").matcher(window);
+                if (m.find()) {
+                    String u = m.group(1);
+                    if (isValidAuthor(u)) {
+                        log.debug("[EXPLORE-V2] Author via user-window: @{}", u);
+                        return u;
+                    }
+                }
+            }
+        }
+
+        // S3: <title> tag — "Display Name (@username) • Instagram photos and videos"
+        {
+            Matcher m = Pattern.compile("<title>[^<]*\\(@([A-Za-z0-9._]{2,30})\\)[^<]*</title>").matcher(html);
+            if (m.find()) {
+                String u = m.group(1);
+                if (isValidAuthor(u)) {
+                    log.debug("[EXPLORE-V2] Author via <title>: @{}", u);
+                    return u;
+                }
+            }
+        }
+
+        // S4: og:description — "N Likes, M Comments - @username on Instagram: ..."
+        {
+            Matcher m = Pattern.compile(
+                    "og:description\"\\s+content\\s*=\\s*\"[^\"]*?@([A-Za-z0-9._]{2,30})\\s+on Instagram",
+                    Pattern.CASE_INSENSITIVE).matcher(html);
+            if (m.find()) {
+                String u = m.group(1);
+                if (isValidAuthor(u)) {
+                    log.debug("[EXPLORE-V2] Author via og:description: @{}", u);
+                    return u;
+                }
+            }
+        }
+
+        // S5: JSON-LD Schema.org — "author":{"alternateName":"@username"}
+        {
+            Matcher m = JSON_LD_AUTHOR_PATTERN.matcher(html);
+            if (m.find()) {
+                String u = m.group(1);
+                if (isValidAuthor(u)) {
+                    log.debug("[EXPLORE-V2] Author via JSON-LD: @{}", u);
+                    return u;
+                }
+            }
+        }
+
+        // S6: DOM — article header anchor links (may fail behind login wall / resource blocking)
+        try {
+            for (ElementHandle link : page.querySelectorAll("article header a")) {
+                String href = link.getAttribute("href");
+                if (href != null && href.startsWith("/") && href.length() > 2) {
+                    String u = href.replace("/", "").trim();
+                    if (isValidAuthor(u)) {
+                        log.debug("[EXPLORE-V2] Author via DOM header: @{}", u);
+                        return u;
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+
+        // S7: Full-page "username" scan — pick the FIRST valid, non-reserved username
+        //     after excluding Instagram's own infrastructure usernames
+        {
+            Matcher m = Pattern.compile("\"username\"\\s*:\\s*\"([A-Za-z0-9._]{3,30})\"").matcher(html);
+            while (m.find()) {
+                String u = m.group(1);
+                if (isValidAuthor(u)) {
+                    log.debug("[EXPLORE-V2] Author via full-page username scan: @{}", u);
+                    return u;
+                }
+            }
+        }
+
+        // All strategies failed — log diagnostic info
+        log.warn("[EXPLORE-V2] ⚠ All 7 author extraction strategies failed. " +
+                "owner-marker-present={}, title-snippet=[{}]",
+                html.contains("\"owner\""),
+                extractTitleSnippet(html));
+        return null;
+    }
+
+    /**
+     * Validates that a username candidate is a real post author (not the bot,
+     * not a reserved Instagram path, not an infrastructure username).
+     */
+    private boolean isValidAuthor(String username) {
+        if (username == null || username.length() < 2) return false;
+        if ("dekhoooooooo".equalsIgnoreCase(username)) return false;
+        if (RESERVED_PATHS.contains(username.toLowerCase())) return false;
+        // Reject common Instagram infrastructure usernames
+        if (username.equalsIgnoreCase("instagram")) return false;
+        if (username.equalsIgnoreCase("meta")) return false;
+        return true;
+    }
+
+    /** Extracts a <title> snippet for diagnostic logging. */
+    private String extractTitleSnippet(String html) {
+        int start = html.indexOf("<title>");
+        if (start == -1) return "<no-title>";
+        int end = html.indexOf("</title>", start);
+        if (end == -1) end = Math.min(start + 100, html.length());
+        return html.substring(start + 7, Math.min(end, start + 100));
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    //  MEDIA URL EXTRACTION
+    // ════════════════════════════════════════════════════════════════════════
+
+    private String extractMediaUrl(String html) {
+        // og:image
+        Matcher m = OG_IMAGE_PATTERN.matcher(html);
+        if (m.find()) {
+            String url = unescapeHtmlEntities(m.group(1));
+            if (url != null && url.startsWith("http")) {
+                log.debug("[EXPLORE-V2] Media URL via og:image");
+                return url;
+            }
+        }
+
+        // display_url JSON field
+        Matcher displayUrl = Pattern.compile(
+                "\"display_url\"\\s*:\\s*\"(https?://[^\"]+)\"").matcher(html);
+        if (displayUrl.find()) {
+            log.debug("[EXPLORE-V2] Media URL via display_url JSON");
+            return displayUrl.group(1).replace("\\/", "/");
+        }
+
+        log.debug("[EXPLORE-V2] Could not extract media URL");
+        return null;
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    //  HASHTAG EXTRACTION
+    // ════════════════════════════════════════════════════════════════════════
+
     private List<String> extractHashtags(String caption) {
         List<String> hashtags = new ArrayList<>();
         if (caption == null || caption.isBlank()) return hashtags;
-
         Matcher m = HASHTAG_PATTERN.matcher(caption);
         Set<String> seen = new LinkedHashSet<>();
         while (m.find()) {
@@ -428,146 +695,21 @@ public class InstagramExploreClient {
                 hashtags.add(tag);
             }
         }
-
-        log.debug("[EXPLORE-V2] Extracted {} unique hashtags from caption", hashtags.size());
+        log.debug("[EXPLORE-V2] Extracted {} unique hashtags", hashtags.size());
         return hashtags;
     }
 
-    /**
-     * Extracts the like count from Instagram's embedded JSON.
-     *
-     * <p>Looks for either of:
-     * <ul>
-     *   <li>{@code "like_count": 12345} — newer Instagram API format</li>
-     *   <li>{@code "edge_media_preview_like": {"count": 12345}} — older GraphQL format</li>
-     * </ul>
-     */
-    private long extractLikeCount(String html) {
-        // Try all matches and return the largest (most likely the post's own like count,
-        // not a comment's like count)
-        long maxLikes = 0;
-        Matcher m = LIKE_COUNT_PATTERN.matcher(html);
-        while (m.find()) {
-            try {
-                long count = Long.parseLong(m.group(1));
-                if (count > maxLikes) {
-                    maxLikes = count;
-                }
-            } catch (NumberFormatException ignored) {
-                // Silently skip malformed numbers
-            }
-        }
+    // ════════════════════════════════════════════════════════════════════════
+    //  TAG PAGE URL COLLECTION (V1 + V2 SHARED)
+    // ════════════════════════════════════════════════════════════════════════
 
-        if (maxLikes > 0) {
-            log.debug("[EXPLORE-V2] Like count: {}", maxLikes);
-        } else {
-            log.debug("[EXPLORE-V2] Could not extract like count from page HTML");
-        }
-
-        return maxLikes;
-    }
-
-    /**
-     * Extracts the post author's username from the embedded JSON {@code "owner"} block.
-     */
-    private String extractAuthorUsername(String html) {
-        Matcher m = OWNER_USERNAME_PATTERN.matcher(html);
-        if (m.find()) {
-            String username = m.group(1);
-            if (!RESERVED_PATHS.contains(username.toLowerCase()) && username.length() > 1) {
-                log.debug("[EXPLORE-V2] Author username: @{}", username);
-                return username;
-            }
-        }
-
-        // Fallback: try generic "username":"..." pattern
-        Matcher fallback = Pattern.compile("\"username\"\\s*:\\s*\"([A-Za-z0-9._]+)\"").matcher(html);
-        while (fallback.find()) {
-            String u = fallback.group(1);
-            if (!RESERVED_PATHS.contains(u.toLowerCase()) && u.length() > 2) {
-                log.debug("[EXPLORE-V2] Author username (fallback): @{}", u);
-                return u;
-            }
-        }
-
-        log.debug("[EXPLORE-V2] Could not extract author username");
-        return null;
-    }
-
-    /**
-     * Extracts the primary media URL from the {@code og:image} meta tag.
-     */
-    private String extractMediaUrl(String html) {
-        Matcher m = OG_IMAGE_PATTERN.matcher(html);
-        if (m.find()) {
-            String url = unescapeHtmlEntities(m.group(1));
-            if (url != null && url.startsWith("http")) {
-                log.debug("[EXPLORE-V2] Media URL extracted (og:image)");
-                return url;
-            }
-        }
-
-        // Fallback: look for display_url in JSON
-        Matcher displayUrl = Pattern.compile("\"display_url\"\\s*:\\s*\"(https?://[^\"]+)\"").matcher(html);
-        if (displayUrl.find()) {
-            String url = displayUrl.group(1).replace("\\/", "/");
-            log.debug("[EXPLORE-V2] Media URL extracted (display_url JSON)");
-            return url;
-        }
-
-        log.debug("[EXPLORE-V2] Could not extract media URL");
-        return null;
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    //  NETWORK INTERCEPTION — Block unnecessary assets for speed
-    // ─────────────────────────────────────────────────────────────
-
-    /**
-     * Installs a route handler on the given page that aborts requests for images,
-     * fonts, stylesheets, and media files. This drastically reduces page load time
-     * when we only need DOM text and JSON payloads.
-     *
-     * <p>Requests that <em>are</em> allowed through:
-     * <ul>
-     *   <li>HTML documents (the page itself)</li>
-     *   <li>XHR / Fetch requests (may contain API data)</li>
-     *   <li>Scripts (needed for JSON hydration)</li>
-     * </ul>
-     */
-    private void installResourceBlocker(Page page) {
-        page.route("**/*", route -> {
-            String resourceType = route.request().resourceType();
-            if (BLOCKED_RESOURCE_TYPES.contains(resourceType)) {
-                route.abort();
-            } else {
-                route.resume();
-            }
-        });
-        log.debug("[EXPLORE-V2] Resource blocker installed — blocking: {}", BLOCKED_RESOURCE_TYPES);
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    //  SHARED PRIVATE METHODS (used by both V1 and V2)
-    // ─────────────────────────────────────────────────────────────
-
-    /**
-     * Navigates to a hashtag tag page, scrolls to load more posts, and collects
-     * post/reel URLs into the provided accumulator set.
-     *
-     * <p>This method is shared between V1 ({@link #fetchExplorePosts}) and
-     * V2 ({@link #fetchExploreSignals}) — the tag-page URL collection logic
-     * is identical for both paths.</p>
-     */
     private void collectFromTagUrl(Page page, String url, Set<String> accumulator) {
         try {
             log.info("[EXPLORE] Navigating → {}", url);
             page.navigate(url);
-            page.waitForLoadState(
-                    LoadState.DOMCONTENTLOADED,
+            page.waitForLoadState(LoadState.DOMCONTENTLOADED,
                     new Page.WaitForLoadStateOptions().setTimeout(DOM_SETTLE_TIMEOUT));
 
-            // Detect session expiry
             if (isLoginPage(page.url())) {
                 log.warn("[EXPLORE] Redirected to login — session expired");
                 sessionManager.invalidateSession();
@@ -576,52 +718,90 @@ public class InstagramExploreClient {
 
             RandomDelayUtil.longDelay();
 
-            // Scroll 2-3 times to load more posts
             for (int i = 0; i < SCROLL_COUNT_PER_TAG; i++) {
                 page.evaluate("window.scrollBy(0, window.innerHeight * 1.5)");
                 RandomDelayUtil.delay();
                 log.debug("[EXPLORE] Scroll {}/{} on {}", i + 1, SCROLL_COUNT_PER_TAG, url);
             }
 
-            // Extract post/reel links from <a> tags, limit to POSTS_PER_TAG from this hashtag
             List<ElementHandle> anchors = page.querySelectorAll("a[href*='/p/'], a[href*='/reel/']");
-            log.debug("[EXPLORE] Found {} anchor elements with /p/ or /reel/ links on {}", anchors.size(), url);
+            log.debug("[EXPLORE] Found {} anchor elements on {}", anchors.size(), url);
 
-            int collectedThisTag = 0;
+            int collected = 0;
             for (ElementHandle a : anchors) {
-                if (collectedThisTag >= POSTS_PER_TAG) break;
+                if (collected >= POSTS_PER_TAG) break;
                 try {
                     String href = a.getAttribute("href");
                     if (href == null || href.isBlank()) continue;
                     String full = href.startsWith("http")
-                            ? href
-                            : "https://www.instagram.com" + href;
-                    // Normalise trailing slash
+                            ? href : "https://www.instagram.com" + href;
                     if (!full.endsWith("/")) full += "/";
-                    // Validate format
-                    String cleanUrl = full.split("\\?")[0];
-                    if (POST_OR_REEL_PATTERN.matcher(cleanUrl).matches()) {
-                        if (accumulator.add(cleanUrl)) {
-                            collectedThisTag++;
-                        }
+                    String clean = full.split("\\?")[0];
+                    if (POST_OR_REEL_PATTERN.matcher(clean).matches() && accumulator.add(clean)) {
+                        collected++;
                     }
                 } catch (Exception e) {
-                    log.trace("[EXPLORE] Skipping anchor: {}", e.getMessage());
+                    log.trace("[EXPLORE] Anchor error: {}", e.getMessage());
                 }
             }
-            log.info("[EXPLORE] Collected {} unique posts from {}. Total unique: {}", collectedThisTag, url, accumulator.size());
+            log.info("[EXPLORE] +{} unique posts from {}. Total: {}", collected, url, accumulator.size());
 
         } catch (Exception e) {
             log.warn("[EXPLORE] Failed to collect from {}: {}", url, e.getMessage());
         }
     }
 
+    // ════════════════════════════════════════════════════════════════════════
+    //  UTILITY HELPERS
+    // ════════════════════════════════════════════════════════════════════════
+
+    /**
+     * Robustly extracts a named Open Graph meta tag {@code content} value,
+     * regardless of attribute declaration order inside the {@code <meta>} tag.
+     */
+    private static String extractOgContent(String html, String property) {
+        int idx = html.indexOf(property + "\"");
+        if (idx == -1) idx = html.indexOf(property + "'");
+        if (idx == -1) return null;
+
+        int tagStart = html.lastIndexOf("<meta", idx);
+        if (tagStart == -1) return null;
+        int tagEnd = html.indexOf(">", idx);
+        if (tagEnd == -1) return null;
+
+        String tag = html.substring(tagStart, tagEnd + 1);
+        Matcher m = Pattern.compile("content\\s*=\\s*[\"']([^\"']+)[\"']").matcher(tag);
+        return m.find() ? m.group(1) : null;
+    }
+
+    /**
+     * Returns {@code true} iff the candidate string is a plausible Instagram
+     * caption (non-null, ≥5 chars, not an Instagram boilerplate phrase).
+     */
+    private static boolean isValidCaption(String s) {
+        if (s == null || s.length() < 5) return false;
+        String lower = s.toLowerCase();
+        if (lower.startsWith("follow") || lower.startsWith("log in") || lower.startsWith("sign up")) return false;
+        if (lower.contains("© instagram") || lower.contains("instagram, inc")) return false;
+        return true;
+    }
+
+    private void installResourceBlocker(Page page) {
+        page.route("**/*", route -> {
+            if (BLOCKED_RESOURCE_TYPES.contains(route.request().resourceType())) {
+                route.abort();
+            } else {
+                route.resume();
+            }
+        });
+        log.debug("[EXPLORE-V2] Resource blocker installed — blocking: {}", BLOCKED_RESOURCE_TYPES);
+    }
+
     private BrowserContext createContext(Browser browser) {
-        return browser.newContext(
-                new Browser.NewContextOptions()
-                        .setStorageStatePath(sessionManager.getSessionPath())
-                        .setViewportSize(1280, 900)
-                        .setUserAgent(USER_AGENT));
+        return browser.newContext(new Browser.NewContextOptions()
+                .setStorageStatePath(sessionManager.getSessionPath())
+                .setViewportSize(1280, 900)
+                .setUserAgent(USER_AGENT));
     }
 
     private boolean isLoginPage(String url) {
@@ -629,43 +809,21 @@ public class InstagramExploreClient {
                 && (url.contains("/accounts/login") || url.contains("/accounts/emailsignup"));
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  STRING UTILITIES
-    // ─────────────────────────────────────────────────────────────
-
-    /**
-     * Unescapes common JSON string escape sequences.
-     */
     private static String unescapeJsonString(String s) {
         if (s == null) return null;
-        return s.replace("\\n", "\n")
-                .replace("\\r", "\r")
-                .replace("\\t", "\t")
-                .replace("\\\"", "\"")
-                .replace("\\/", "/")
-                .replace("\\\\", "\\");
+        return s.replace("\\n", "\n").replace("\\r", "\r").replace("\\t", "\t")
+                .replace("\\\"", "\"").replace("\\/", "/").replace("\\\\", "\\");
     }
 
-    /**
-     * Unescapes common HTML entities found in meta tag content attributes.
-     */
     private static String unescapeHtmlEntities(String s) {
         if (s == null) return null;
-        return s.replace("&amp;", "&")
-                .replace("&lt;", "<")
-                .replace("&gt;", ">")
-                .replace("&quot;", "\"")
-                .replace("&#39;", "'")
-                .replace("&#x27;", "'")
-                .replace("&apos;", "'");
+        return s.replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">")
+                .replace("&quot;", "\"").replace("&#39;", "'")
+                .replace("&#x27;", "'").replace("&apos;", "'");
     }
 
-    /**
-     * Truncates a string to the specified maximum length, appending "..." if truncated.
-     */
     private static String truncate(String s, int maxLen) {
         if (s == null) return "<null>";
-        if (s.length() <= maxLen) return s;
-        return s.substring(0, maxLen) + "...";
+        return s.length() <= maxLen ? s : s.substring(0, maxLen) + "...";
     }
 }

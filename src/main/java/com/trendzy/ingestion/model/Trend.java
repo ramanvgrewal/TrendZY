@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,44 +20,74 @@ public class Trend {
     @Id
     private String id;
 
-    private String productName;
+    // ── Core Identity — Fixed Mapping ──
+    @Field("name")
+    private String trendName;
+
     private String category;
     private String subcategory;
+    private String aestheticId;
 
-    private double trendScore; // 0-100
-    private double velocity; // e.g., 38.0
-    private String velocityLabel; // "+38%"
+    // ── Intelligence Metrics ──
+    private double trendScore;
+    private double momentumScore;
+    private double velocity;
+    private String velocityLabel;
 
-    private String tier; // "trending" | "rising"
-    private List<String> vibeTags; // ["#Y2K", "#Streetwear"]
+    private String tier;
+    private List<String> vibeTags;
 
+    // ── AI Analysis ──
     private String aiSummary;
     private List<String> whyTrending;
     private String indiaRelevanceNote;
     private boolean indiaRelevant;
 
+    // ── Signal Evidence ──
     private long totalSignals;
-    private List<String> detectedSubreddits;
-    private long youtubeVideoCount;
 
-    // ── AI analysis status ──
-    private boolean processedByAi;
+    // ── Mapped Signal Evidence ──
+    @Field("supportingSignals")
+    private List<String> supportingSignalIds;
 
-    // ── Enrichment result ──
-    private String imageUrl;
-    private String shopUrl;         // single best product URL
-    private String platform;        // winning platform: "myntra", "amazon", etc.
-    private String enrichmentStatus; // PENDING, COMPLETED, NO_VALID_PRODUCT
+    // ── Product Enrichment Fields ──
+    private String enrichmentStatus;
+    private String enrichmentQuery;
+    private List<String> aiBrandNames;
 
-    // ── Legacy per-platform URLs (deprecated, kept for backward compat) ──
-    private String amazonUrl;
-    private String flipkartUrl;
-    private String myntraUrl;
+    // New Nested Object Architecture
+    private ScrapedProducts products;
 
     private double estimatedPrice;
-
     private LocalDateTime firstDetectedAt;
     private LocalDateTime lastUpdatedAt;
 
-    private boolean active;
+    @Builder.Default
+    private boolean active = true;
+
+    // ── Nested Classes for MongoDB Mapping ──
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ScrapedProducts {
+        private ProductDetail amazon;
+        private ProductDetail flipkart;
+        private ProductDetail underdog;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ProductDetail {
+        private String brandName;
+        private String title;
+        private Integer price;          // The selling/discounted price
+        private Integer originalPrice;  // The MRP / crossed-out price
+        private String shopUrl;
+        private String imageUrl;
+        private Boolean codAvailable;
+    }
 }

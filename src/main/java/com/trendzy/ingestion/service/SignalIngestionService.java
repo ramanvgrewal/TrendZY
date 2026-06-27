@@ -5,7 +5,6 @@ import com.trendzy.ingestion.model.TrendSignal;
 import com.trendzy.ingestion.repository.TrendSignalRepository;
 import com.trendzy.ingestion.scraper.instagram.InstagramExploreClient;
 import com.trendzy.ingestion.kafka.KafkaSignalProducer;
-import com.trendzy.ingestion.scraper.pinterest.PinterestExploreClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -13,24 +12,35 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean; // <-- ADD THIS IMPORT
 
-/**
- * Orchestrates the V2 data ingestion cycle.
- */
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class SignalIngestionService {
 
     private final InstagramExploreClient instagramExploreClient;
-    private final PinterestExploreClient pinterestExploreClient;
     private final TrendSignalRepository trendSignalRepository;
     private final KafkaSignalProducer kafkaSignalProducer;
 
+    // The un-hackable lock to protect your RAM
+    private final AtomicBoolean isRunning = new AtomicBoolean(false);
+
+    // Let the controller check if it's currently busy
+    public boolean isIngestionRunning() {
+        return isRunning.get();
+    }
+
     @Async
-    public void runIngestionCycle(String instagramSection, String pinterestQuery) {
+    public void runIngestionCycle(String instagramSection) {
+        // Compare-and-Set: If it's false, set it to true and proceed. If it's already true, return.
+        if (!isRunning.compareAndSet(false, true)) {
+            log.warn("[INGESTION] 🚨 Cycle already running! Ignoring duplicate background execution.");
+            return;
+        }
+
         log.info("[INGESTION] ════════ STARTING V2 INGESTION CYCLE ════════");
-        
+
         List<TrendSignal> allSignals = new ArrayList<>();
 
         try (Playwright playwright = Playwright.create()) {
@@ -40,20 +50,23 @@ public class SignalIngestionService {
             } catch (Exception e) {
                 log.error("[INGESTION] Instagram scraper failed: {}", e.getMessage());
             }
-
-            // Pinterest Extraction
-            try {
-                allSignals.addAll(pinterestExploreClient.fetchExploreSignals(playwright, pinterestQuery));
-            } catch (Exception e) {
-                log.error("[INGESTION] Pinterest scraper failed: {}", e.getMessage());
-            }
         } catch (Exception e) {
             log.error("[INGESTION] Fatal Playwright error: {}", e.getMessage(), e);
-            return;
-        }
+        } finally {
+            // Save data to Mongo
+            int newSignals = processAndSaveSignals(allSignals);
+            log.info("[INGESTION] CYCLE COMPLETE | New Signals: {} | Total Scraped: {}", newSignals, allSignals.size());
 
+            // 🔓 RELEASING THE LOCK - guaranteed to happen even if Playwright throws an exception
+            isRunning.set(false);
+            log.info("[INGESTION] 🔓 Lock released. Ready for next cycle.");
+        }
+    }
+
+    private int processAndSaveSignals(List<TrendSignal> allSignals) {
         int newSignals = 0;
         for (TrendSignal signal : allSignals) {
+            // The DB unique index handles race conditions, but we do a quick app-level check first to avoid throwing unnecessary exception logs
             if (!trendSignalRepository.existsBySourceUrl(signal.getSourceUrl())) {
                 try {
                     TrendSignal saved = trendSignalRepository.save(signal);
@@ -64,6 +77,6 @@ public class SignalIngestionService {
                 }
             }
         }
-        log.info("[INGESTION] CYCLE COMPLETE | New Signals: {} | Total Scraped: {}", newSignals, allSignals.size());
+        return newSignals;
     }
 }

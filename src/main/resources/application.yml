@@ -7,11 +7,15 @@ spring:
 
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost:27017}
+      uri: ${MONGODB_URI:mongodb://127.0.0.1:27017}
       database: trendzy
 
   kafka:
-    bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}
+    bootstrap-servers: ${KAFKA_SERVERS:127.0.0.1:9092}
+    admin:
+      properties:
+        request.timeout.ms: 30000
+        default.api.timeout.ms: 30000
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -35,6 +39,4 @@ spring:
 
 scraper:
   instagram:
-    session-dir: ${user.home}/.trendzy
-  pinterest:
     session-dir: ${user.home}/.trendzy

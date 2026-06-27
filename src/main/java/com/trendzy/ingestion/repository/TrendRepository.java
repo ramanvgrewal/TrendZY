@@ -31,7 +31,8 @@ public interface TrendRepository extends MongoRepository<Trend, String> {
     @Query("{ 'vibeTags': ?0, 'indiaRelevant': ?1, 'active': true }")
     Page<Trend> findByVibeTagAndIndiaRelevantAndActiveTrue(String vibeTag, boolean indiaRelevant, Pageable pageable);
 
-    boolean existsByProductNameIgnoreCase(String productName);
+    // Swapped productName for trendName
+    boolean existsByTrendNameIgnoreCase(String trendName);
 
     @Query(value = "{ 'active': true }", sort = "{ 'trendScore': -1 }")
     List<Trend> findTopTrends(Pageable pageable);
@@ -40,9 +41,8 @@ public interface TrendRepository extends MongoRepository<Trend, String> {
     long countByActiveTrue();
     long countByIndiaRelevantTrueAndActiveTrue();
 
-    List<Trend> findByCategoryAndIdNotAndActiveTrue(String category, String id, Pageable pageable);
-
-    List<Trend> findByImageUrlIsNullAndActiveTrue();
+    // Swapped category for aestheticId for fetching related trends
+    List<Trend> findByAestheticIdAndIdNotAndActiveTrue(String aestheticId, String id, Pageable pageable);
 
     @Query("{ '$or': [{'enrichmentStatus': 'PENDING'}, {'enrichmentStatus': null}], 'active': true }")
     List<Trend> findPendingEnrichment();
@@ -53,22 +53,21 @@ public interface TrendRepository extends MongoRepository<Trend, String> {
     Page<Trend> findByActiveTrue(Pageable pageable);
 
     // ── Autocomplete ───────────────────────────────────────────
-    @Query("{ 'productName': { $regex: ?0, $options: 'i' }, 'active': true }")
-    List<Trend> findTop8ByProductNameRegex(String regex);
+    // Swapped productName for trendName
+    @Query("{ 'name': { $regex: ?0, $options: 'i' }, 'active': true }")
+    List<Trend> findTop8ByTrendNameRegex(String regex);
 
-    // ── Full text search — requires text index on productName + category ──
-    // ── TrendRepository — replace all $text queries ──────────────
+    // ── Full text search — Swapped productName for trendName ──
 
-    @Query("{ 'productName': { $regex: ?0, $options: 'i' }, 'active': true }")
+    @Query("{ 'name': { $regex: ?0, $options: 'i' }, 'active': true }")
     Page<Trend> searchByKeyword(String keyword, Pageable pageable);
 
-    @Query("{ 'productName': { $regex: ?0, $options: 'i' }, 'tier': ?1, 'active': true }")
+    @Query("{ 'name': { $regex: ?0, $options: 'i' }, 'tier': ?1, 'active': true }")
     Page<Trend> searchByKeywordAndTier(String keyword, String tier, Pageable pageable);
 
-    @Query("{ 'productName': { $regex: ?0, $options: 'i' }, 'vibeTags': ?1, 'active': true }")
+    @Query("{ 'name': { $regex: ?0, $options: 'i' }, 'vibeTags': ?1, 'active': true }")
     Page<Trend> searchByKeywordAndVibe(String keyword, String vibe, Pageable pageable);
 
-    @Query("{ 'productName': { $regex: ?0, $options: 'i' }, 'tier': ?1, 'vibeTags': ?2, 'active': true }")
-    Page<Trend> searchByKeywordAndTierAndVibe(String keyword, String tier,
-                                              String vibe, Pageable pageable);
+    @Query("{ 'name': { $regex: ?0, $options: 'i' }, 'tier': ?1, 'vibeTags': ?2, 'active': true }")
+    Page<Trend> searchByKeywordAndTierAndVibe(String keyword, String tier, String vibe, Pageable pageable);
 }
